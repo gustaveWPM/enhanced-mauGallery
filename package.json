@@ -1,10 +1,16 @@
 {
-  "name": "maugallery",
-  "version": "1.0.1",
-  "description": "A simple images gallery built with jQuery and bootstrap 4",
+  "name": "maugallery-bs5",
+  "version": "1.0.0",
+  "description": "mauGallery updated to Bootstrap 5, vanilla JS",
   "main": "dist/maugallery.js",
   "author": "Lefteris Psitopoulos <hello@bakedbird.com>",
+  "contributors": [
+    "Gustave WPM <imhonestjohn@protonmail.com> (https://github.com/gustaveWPM)"
+  ],
   "license": "MIT",
   "private": true,
-  "repository": "https://github.com/bakedbird/mauGallery.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gustaveWPM/mauGallery-without-jquery"
+  }
 }

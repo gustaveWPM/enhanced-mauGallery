@@ -24,7 +24,7 @@
     display: flex;
     font-size: 24px;
     user-select: none;
-    transition: margin-right .5s, margin-left .5s
+    transition: margin-right .5s, margin-left .5s;
 }
 
 .modal-dialog {
@@ -32,7 +32,24 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    margin: 0 auto 0 auto
+    margin: 0 auto 0 auto;
+}
+
+#gallery-items-row {
+    animation: galleryFadeIn .5s ease-in;
+}
+
+.mau.nav-link,
+.mau.nav-link:hover {
+    cursor: pointer;
+    color: #000;
+    transition: none;
+}
+
+#active-tag {
+    color: #fff;
+    background-color: #305b66;
+    border-radius: 0;
 }
 
 @media only screen and (max-width:1000px) {
@@ -40,8 +57,4 @@
     .mg-prev {
         margin: -25px 15px;
     }
-}
-
-#gallery-items-row {
-    animation: galleryFadeIn .5s ease-in
 }
