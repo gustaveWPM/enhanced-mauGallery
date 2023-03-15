@@ -93,12 +93,15 @@ function mauGallery(opt = {}) {
     function filterByTag(element, options) {
       function forceRedraw(galleryItemsRowId) {
         const rootNode = document.querySelector(`#${galleryItemsRowId}`);
-        const displayStyleMemo = rootNode.style.display;
         rootNode.style.animation = 'none';
         rootNode.style.display = 'none';
         rootNode.offsetHeight;
-        rootNode.style.display = displayStyleMemo;
+        rootNode.style.display = null;
         rootNode.style.animation = null;
+        rootNode.style.animationName = 'none';
+        requestAnimationFrame(() => {
+          rootNode.style.animationName = null;
+        });
       }
       if (element.id === options.filtersActiveTagId) {
         return;
