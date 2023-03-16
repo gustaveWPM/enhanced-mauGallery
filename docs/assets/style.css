@@ -23,7 +23,6 @@
   align-items: center;
   display: flex;
   font-size: 24px;
-  user-select: none;
   transition: margin-right .5s, margin-left .5s;
 }
 
