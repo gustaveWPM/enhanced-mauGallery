@@ -13,8 +13,8 @@
   cursor: pointer;
 }
 
-.mg-next,
-.mg-prev {
+.mau.mg-next,
+.mau.mg-prev {
   margin: -25px;
   width: 50px;
   height: 50px;
@@ -23,38 +23,25 @@
   align-items: center;
   display: flex;
   font-size: 24px;
-  transition: margin-right .5s, margin-left .5s;
+  user-select: none;
+  transition: margin-right .5s, margin-left .5s
 }
 
-.modal-dialog {
+.mau.modal-dialog {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  margin: 0 auto 0 auto;
-}
-
-#gallery-items-row {
-  animation: galleryFadeIn .5s ease-in;
-}
-
-.mau.nav-link,
-.mau.nav-link:hover {
-  cursor: pointer;
-  color: #000;
-  transition: none;
-}
-
-#active-tag {
-  color: #fff;
-  background-color: #305b66;
-  border-radius: 0;
+  margin: 0 auto 0 auto
 }
 
 @media only screen and (max-width:1000px) {
-
-  .mg-next,
-  .mg-prev {
+  .mau.mg-next,
+  .mau.mg-prev {
     margin: -25px 15px;
   }
+}
+
+#gallery-items-row {
+  animation: galleryFadeIn .5s ease-in
 }
