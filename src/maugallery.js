@@ -18,6 +18,7 @@ function mauGallery(opt = {}) {
   };
   let memoCurX = 0;
   let memoCurY = 0;
+  let memoScrollBehavior = '';
   const tagsSet = new Set();
 
   function injectMau(target, options) {
@@ -114,11 +115,12 @@ function mauGallery(opt = {}) {
           rootNode.style.animationName = null;
         });
       }
+
       if (element.id === options.filtersActiveTagId) {
         return;
       }
-      memoCurX = window.scrollX;
-      memoCurY = window.scrollY;
+
+      saveCurrentCameraPosition();
       forceReplayAnim(options);
       const galleryItems = document.querySelectorAll(`#${options.galleryRootNodeId} .${options.mauPrefixClass}.${options.galleryItemClass}`);
       const activeTag = document.querySelector(`.${options.mauPrefixClass}#${options.filtersActiveTagId}`);
@@ -135,7 +137,7 @@ function mauGallery(opt = {}) {
         } else {
           item.parentNode.parentNode.style.display = 'none';
         }
-        cancelScroll(memoCurX, memoCurY, delay = 2);
+        snapCameraToSavedPosition(delay = 3);
       });
     }
 
@@ -247,17 +249,33 @@ function mauGallery(opt = {}) {
       }
     }
 
-    function cancelScroll(memoCurX, memoCurY, delay = 1) {
+    function saveCurrentCameraPosition() {
+      memoScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = 'smooth !important;'
+      memoCurX = window.scrollX;
+      memoCurY = window.scrollY;
+    }
+
+    function clearSaveCurrentCameraPositionSideEffects() {
+      document.documentElement.style.scrollBehavior = memoScrollBehavior;
+    }
+
+    function snapCamera(x, y, delay = 0) {
       setTimeout(() => {
         const oldScrollBehavior = document.documentElement.style.scrollBehavior;
         document.documentElement.style.scrollBehavior = 'auto !important;'
         window.scrollTo({
-          top: memoCurY,
-          left: memoCurX,
+          top: y,
+          left: x,
           behavior: 'auto'
         });
         document.documentElement.style.scrollBehavior = oldScrollBehavior;
       }, delay);
+    }
+
+    function snapCameraToSavedPosition(delay = 2) {
+      snapCamera(memoCurX, memoCurY, delay);
+      clearSaveCurrentCameraPositionSideEffects();
     }
 
     function generateListeners(gallery, modal, options) {
@@ -290,8 +308,7 @@ function mauGallery(opt = {}) {
       galleryElementMgNext.addEventListener('click', () => nextImage(options));
 
       modal.addEventListener('shown.bs.modal', () => {
-        memoCurX = window.scrollX;
-        memoCurY = window.scrollY;
+        saveCurrentCameraPosition();
         document.addEventListener('keydown', handleKeyDown);
       });
 
@@ -302,8 +319,8 @@ function mauGallery(opt = {}) {
             button.removeAttribute('tabindex');
           }
         }
+        snapCameraToSavedPosition();
         document.removeEventListener('keydown', handleKeyDown);
-        cancelScroll(memoCurX, memoCurY, delay = 1);
       });
     }
 
