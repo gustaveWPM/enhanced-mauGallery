@@ -1,6 +1,6 @@
 {
   "name": "maugallery-bs5",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "mauGallery updated to Bootstrap 5, vanilla JS + Keyboard navigation + Enhanced mobile compatibility",
   "main": "dist/maugallery.js",
   "author": "Lefteris Psitopoulos <hello@bakedbird.com>",
