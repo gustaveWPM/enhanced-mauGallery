@@ -1,16 +1,16 @@
 {
-  "name": "maugallery-bs5",
-  "version": "1.2.0",
+  "name": "enhanced-maugallery",
+  "version": "1.0.0",
   "description": "mauGallery updated to Bootstrap 5, vanilla JS + Keyboard navigation + Enhanced mobile compatibility",
   "main": "dist/maugallery.js",
-  "author": "Lefteris Psitopoulos <hello@bakedbird.com>",
+  "author": "Gustave WPM <imhonestjohn@protonmail.com> (https://github.com/gustaveWPM)",
   "contributors": [
-    "Gustave WPM <imhonestjohn@protonmail.com> (https://github.com/gustaveWPM)"
+    "Lefteris Psitopoulos <hello@bakedbird.com>"
   ],
   "license": "MIT",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/gustaveWPM/mauGallery-without-jquery"
+    "url": "https://github.com/gustaveWPM/enhanced-mauGallery"
   }
 }

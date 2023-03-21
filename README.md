@@ -6,7 +6,7 @@ Bootstrap 5 Gallery, vanilla JS.
 
 ### Demo
 
-[https://gustavewpm.github.io/mauGallery-without-jquery/](https://gustavewpm.github.io/mauGallery-without-jquery/)
+[https://gustavewpm.github.io/enhanced-mauGallery/](https://gustavewpm.github.io/enhanced-mauGallery/)
 
 ---
 
