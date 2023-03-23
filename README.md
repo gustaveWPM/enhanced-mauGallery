@@ -13,6 +13,7 @@ Bootstrap 5 Gallery, vanilla JS.
 - Configurable CSS
 - Intelligent modal sizing
 - Intelligent scroll on modal quit
+- Pagespeed optimization (dynamic modal images lazyloading)
 
 ### Demo
 
