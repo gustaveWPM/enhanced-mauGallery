@@ -4,7 +4,7 @@ function mauGallery(opt = {}) {
     'lightBox': true,
     'showTags': true,
     'navigation': true,
-    'tagsPosition': 'bottom',
+    'tagsPosition': 'top',
     'prevImgButtonLabel': 'Previous image',
     'nextImgButtonLabel': 'Next image',
     'disableFiltersButtonLabel': 'All',
@@ -130,23 +130,29 @@ function mauGallery(opt = {}) {
       return offset;
     }
 
-    function isInViewport(element, isFullyInViewport = false) {
+    function getElementUpperPx(element) {
       const navbarElement = document.querySelector('.navbar');
       const delta = navbarElement ? parseInt(window.getComputedStyle(navbarElement).height, 10) : 0;
       const height = parseInt(window.getComputedStyle(element).height, 10) - 1;
-      const width = parseInt(window.getComputedStyle(element).width, 10) - 1;
       const rect = element.getBoundingClientRect();
       const computedUpPx = rect.bottom - height + delta;
+      return computedUpPx;
+    }
+
+    function isInViewport(element, checkFullyInViewport = false) {
+      const width = parseInt(window.getComputedStyle(element).width, 10) - 1;
+      const rect = element.getBoundingClientRect();
+      const computedUpPx = getElementUpperPx(element);
       const computedLeftPx = rect.right - width;
       let expected = null;
-      if (isFullyInViewport) {
+      if (checkFullyInViewport) {
         expected = (computedUpPx >= 0 && computedLeftPx >= 0) &&
-        (computedUpPx <= window.innerHeight && computedLeftPx <= window.innerWidth) &&
-        (rect.bottom <= window.innerHeight && rect.right <= window.innerWidth)
+          (computedUpPx <= window.innerHeight && computedLeftPx <= window.innerWidth) &&
+          (rect.bottom <= window.innerHeight && rect.right <= window.innerWidth)
       } else {
         expected = (computedUpPx >= 0 && computedLeftPx >= 0) &&
-        (computedUpPx <= window.innerHeight && computedLeftPx <= window.innerWidth) ||
-        (rect.bottom <= window.innerHeight && rect.right <= window.innerWidth)
+          (computedUpPx <= window.innerHeight && computedLeftPx <= window.innerWidth) ||
+          (rect.bottom <= window.innerHeight && rect.right <= window.innerWidth)
       }
       return expected;
     }
@@ -195,14 +201,21 @@ function mauGallery(opt = {}) {
     }
 
     function moveCameraToSavedPosition(activeElement = null) {
-      if (isOnMobile() || !activeElement) {
+      if (isOnMobile() || !activeElement) {
         snapCamera(memos('curX'), memos('curY'));
       } else if (activeElement) {
         let preventScroll = true;
-        if (!isInViewport(activeElement)) {
-          preventScroll = false;
+        if (!isInViewport(activeElement, checkFullyInViewport = true)) {
+          const computedUpPx = getElementUpperPx(activeElement);
+          if (computedUpPx < 0) {
+            activeElement.scrollIntoView(false);
+          } else {
+            if (!isInViewport(activeElement)) {
+              preventScroll = false;
+            }
+          }
         }
-        activeElement.focus({preventScroll});
+        activeElement.focus({ preventScroll });
         if (preventScroll) {
           if (memos('lockScreenHasGlitched') && window.scrollY + memos('curYDelta') === memos('curY')) {
             snapCamera(memos('curX'), memos('curY'));
@@ -307,7 +320,9 @@ function mauGallery(opt = {}) {
     }
 
     function getCurrentModalImage(modal) {
-      return modal.querySelector('.mau.modal-gallery-item.active img');
+      const galleryItemClass = options('galleryItemClass');
+      const mauPrefixClass = options('mauPrefixClass');
+      return modal.querySelector(`.${mauPrefixClass}.modal-${galleryItemClass}.active img`);
     }
 
     function getRichGalleryItems(lazy = true) {
@@ -384,7 +399,8 @@ function mauGallery(opt = {}) {
       });
 
       const modalCarousel = getModalCarouselElement();
-      const modalCarouselColumns = modalCarousel.querySelectorAll('.mau.modal-gallery-item');
+      const galleryItemClass = options('galleryItemClass');
+      const modalCarouselColumns = modalCarousel.querySelectorAll(`.${mauPrefixClass}.modal-${galleryItemClass}`);
       modalCarouselColumns.forEach(column => {
         const item = column.querySelector('img');
         if (tag === 'all' || item.dataset.galleryTag === tag) {
@@ -471,7 +487,9 @@ function mauGallery(opt = {}) {
         if (!isOnMobile()) {
           const lightboxId = options('lightboxId');
           const mgNextElement = event.target.querySelector(`#${lightboxId} .mg-next`);
-          mgNextElement.parentNode.focus();
+          if (!isOnMobile()) {
+            mgNextElement.parentNode.focus();
+          }
         }
       });
 
@@ -486,7 +504,7 @@ function mauGallery(opt = {}) {
         // * ... Work-around (5): set the modal display to none to be consistent with the work-around n°4.
         getModalElement().style.display = 'none';
       });
-  
+
       const modalTriggerClass = options('modalTriggerClass');
       elements = gallery.querySelectorAll(`.${mauPrefixClass}.${modalTriggerClass}`);
       document.addEventListener('keydown', event => {
@@ -553,7 +571,8 @@ function mauGallery(opt = {}) {
         carouselElement = element.parentNode;
       }
       if (activationState) {
-        const modalCarouselElements = getModalElement().querySelectorAll('.mau.modal-gallery-item');
+        const galleryItemClass = options('galleryItemClass');
+        const modalCarouselElements = getModalElement().querySelectorAll(`.${options('mauPrefixClass')}.modal-${galleryItemClass}`);
         modalCarouselElements.forEach(element => element.classList.remove('active'));
         carouselElement.classList.add('active');
       } else {
@@ -577,10 +596,15 @@ function mauGallery(opt = {}) {
       if (options('navigation')) {
         const lightboxId = options('lightboxId');
         // * ... Work-around (2): force the keyboard navigation to be immediately available as soon the focus is placed on a carousel button.
+        const carouselSingletonInstance = bootstrap.Carousel.getInstance(`#${lightboxId}-carousel`) ?? new bootstrap.Carousel(`#${lightboxId}-carousel`);
         if (!isOnMobile()) {
-          const carouselSingletonInstance = bootstrap.Carousel.getInstance(`#${lightboxId}-carousel`) ?? new bootstrap.Carousel(`#${lightboxId}-carousel`);
           carouselSingletonInstance._slide(carouselSingletonInstance._directionToOrder('right'));
           carouselSingletonInstance._slide(carouselSingletonInstance._directionToOrder('left'));
+        } else {
+          const virtualClick = new Event('click');
+          const mgNextElement = modal.querySelector(`#${lightboxId} .mg-next`);
+          mgNextElement.dispatchEvent(virtualClick);
+          carouselSingletonInstance._slide(carouselSingletonInstance._directionToOrder('right'));
         }
       }
 
@@ -592,7 +616,7 @@ function mauGallery(opt = {}) {
         saveActiveElement();
         memos('curX', -1);
       }
-      
+
       const m = document.querySelector(`#${lightboxId}`);
       const modalSingletonInstance = bootstrap.Modal.getInstance(m) ?? new bootstrap.Modal(m);
       modalSingletonInstance.show();
@@ -628,7 +652,8 @@ function mauGallery(opt = {}) {
           initializeModalImg(currentElement, htmlAttributesWhitelist);
         }
         if (currentElement) {
-          const wrappedCurrentElement = wrap(currentElement, '<div class="carousel-item mau modal-gallery-item" style="transition: all 0s !important">', '</div>');
+          const galleryItemClass = options('galleryItemClass');
+          const wrappedCurrentElement = wrap(currentElement, `<div class="carousel-item mau modal-${galleryItemClass}" style="transition: all 0s !important">`, '</div>');
           carouselInner += wrappedCurrentElement.outerHTML;
         }
       });
@@ -642,7 +667,7 @@ function mauGallery(opt = {}) {
                     ${carouselInner}
                   </div>
                   ${navigation
-                    ? `<button class="carousel-control-prev" type="button" data-bs-target="#${lightboxId}-carousel" data-bs-slide="prev" style="touch-action:manipulation">
+          ? `<button class="carousel-control-prev" type="button" data-bs-target="#${lightboxId}-carousel" data-bs-slide="prev" style="touch-action:manipulation">
                          <span class="carousel-control-prev-icon mau mg-prev" aria-hidden="true"></span>
                          <span class="visually-hidden">${prevImgBtnLabel}</span>
                        </button>
@@ -650,8 +675,8 @@ function mauGallery(opt = {}) {
                          <span class="carousel-control-next-icon mau mg-next" aria-hidden="true"></span>
                          <span class="visually-hidden">${nextImgBtnLabel}</span>
                        </button>`
-                    : ''
-                  }
+          : ''
+        }
                 </div>
               </div>
             </div>
@@ -693,6 +718,7 @@ function mauGallery(opt = {}) {
       const mauPrefixClass = options('mauPrefixClass');
       const lightboxId = options('lightboxId');
       const galleryItemsRowId = options('galleryItemsRowId');
+      const galleryItemClass = options('galleryItemClass');
       const modalArrowSizeRuleValue = modalArrowBoxesSize + modalArrowBoxesSizeUnit;
       const modalArrowHalfSizeRuleValue = modalArrowBoxesSizeHalf + modalArrowBoxesSizeUnit;
 
@@ -707,7 +733,7 @@ function mauGallery(opt = {}) {
             animation: ${modalAnimationRuleValue}
           }`,
         'navigationButtons': `
-          .mau.mg-next, .mau.mg-prev {
+          .${mauPrefixClass}.mg-next, .${mauPrefixClass}.mg-prev {
             --_nav-btns-delta: calc(${modalArrowSizeRuleValue} * .2);
             display: block;
             position: absolute;
@@ -718,13 +744,13 @@ function mauGallery(opt = {}) {
             transition: left ${arrowTransitionDelay}, right ${arrowTransitionDelay};
           }`,
         'navigationButtonRight': `
-          .mau.mg-next {
+          .${mauPrefixClass}.mg-next {
             --_negative-value: -${modalArrowSizeRuleValue};
             --_right: calc(var(--_negative-value) - var(--_nav-btns-delta));
             right: var(--_right)
           }`,
         'navigationButtonLeft': `
-          .mau.mg-prev {
+          .${mauPrefixClass}.mg-prev {
             --_negative-value: -${modalArrowSizeRuleValue};
             --_left: calc(var(--_negative-value) - var(--_nav-btns-delta));
             left: var(--_left);
@@ -733,9 +759,31 @@ function mauGallery(opt = {}) {
           #${lightboxId} .carousel-control-prev, #${lightboxId} .carousel-control-next {
             width: 0;
           }`,
+        'hotfix_a': `
+          .${mauPrefixClass}.item-column {
+            position: relative;
+            margin-bottom: 0 !important;
+            padding: 0;
+          }`,
+        'hotfix_b': `
+          .${mauPrefixClass}.item-column::after {
+            content: "";
+            position: relative;
+            z-index: -1000;
+            display: block;
+            padding-bottom: 100%;
+          }`,
+        'hotfix_c': `
+          .${mauPrefixClass}.${galleryItemClass} {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            padding: .5em;
+          }`,
         'navigationButtonsResponsive': `
           @media (max-width: 1000px) {
-            .mau.mg-next, .mau.mg-prev {
+            .${mauPrefixClass}.mg-next, .${mauPrefixClass}.mg-prev {
               left: calc(var(--_left) / 12);
               right: calc(var(--_right) / 12);
               margin: 0 calc(var(--_nav-btns-delta) / 2);

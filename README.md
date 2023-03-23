@@ -4,6 +4,16 @@
 
 Bootstrap 5 Gallery, vanilla JS.
 
+## New features
+
+- Removed JQuery (+ updated to Bootstrap 5.2.3)
+- Complete keyboard navigation
+- Enhanced mobiles compatibility
+- Pictures HTMLDom compatible (and also responsive images compatible)
+- Configurable CSS
+- Intelligent modal sizing
+- Intelligent scroll on modal quit
+
 ### Demo
 
 [https://gustavewpm.github.io/enhanced-mauGallery/](https://gustavewpm.github.io/enhanced-mauGallery/)
