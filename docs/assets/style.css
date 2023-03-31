@@ -1,3 +1,17 @@
+@keyframes delayedFadeIn {
+  0% {
+      opacity: 0;
+  }
+
+  50% {
+      opacity: 0;
+  }
+
+  100% {
+      opacity: 1;
+  }
+}
+
 .mau.nav-link,
 .mau.nav-link:hover {
   transition: none
@@ -7,6 +21,10 @@
   color: #fff;
   background-color: #666130;
   border-radius: 0
+}
+
+.mau.gallery-placeholder {
+  animation: delayedFadeIn 2s;
 }
 
 /*----------------------*/
@@ -25,6 +43,8 @@
   z-index: 3;
   background: rgba(255, 255, 255, .85);
   background: linear-gradient(180deg, rgba(255, 255, 255, .31) 0%, rgba(255, 255, 255, .85) 100%);
+  border-bottom: 2px solid;
+  border-color: rgb(var(--bs-info-rgb));
 }
 
 .top-header h1 {

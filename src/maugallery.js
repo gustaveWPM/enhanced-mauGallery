@@ -832,7 +832,7 @@ Object.assign(_mauGalleryManager, {
           const screenOrientation = mobileInstance.getCurrentScreenOrientation();
 
           if (screenOrientation && screenOrientation != mobileInstance.getSavedScreenOrientation()) {
-            /* ToDo: fix intelligent scroll here
+            /* ToDo: fix intelligent scroll here (try to type this lib and then transpile it with terabytes of polyfills before any manual check)
                const absoluteY = _mauGalleryManager.DOM_Manipulations_Instance.getAbsoluteElementY(activeElement);
                alert(`test: ${absoluteY} ;; ${activeElement}`);
                _mauGalleryManager.Camera_Instance.moveCamera(null, absoluteY); */
@@ -918,15 +918,7 @@ Object.assign(_mauGalleryManager, {
 
           function handleCameraSideEffects() {
             if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
-              const activeElementTop = document.activeElement.getBoundingClientRect().top;
-              const activeElementTopsDistance = Math.abs(activeElementOldTop - activeElementTop);
-
-              if (activeElementTopsDistance >= 100) {
-                const oldPaddingBottom = document.activeElement.style.paddingBottom;
-                document.activeElement.style.paddingBottom = '25px';
-                document.activeElement.scrollIntoView(false);
-                document.activeElement.style.paddingBottom = oldPaddingBottom;
-              }
+              document.activeElement.scrollIntoView(false);
             }
           }
 
