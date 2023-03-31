@@ -111,8 +111,8 @@ Object.assign(_mauGalleryManager, {
         this.screenOrientation = null;
       }
 
-      isOnMobile() {
-        if (this.onMobile === null) {
+      isOnMobile(lazy = true) {
+        if (!lazy || this.onMobile === null) {
           const userAgent = navigator.userAgent.toLowerCase();
           this.onMobile = userAgent.match(/(ipad)|(iphone)|(ipod)|(android)|(webos)|(blackberry)|(tablet)|(kindle)|(playbook)|(silk)|(windows phone)/i);
         }
@@ -192,14 +192,11 @@ Object.assign(_mauGalleryManager, {
           modal.addEventListener('hidden.bs.modal', (event) => {
             const modalInstance = _mauGalleryManager['Modal_Instance'];
             const cameraInstance = _mauGalleryManager['Camera_Instance'];
-
             const oldCurrentModalImg = modalInstance.getCurrentModalImage(event.target);
-            const activeElement = cameraInstance.memos('activeElement');
 
-            cameraInstance.moveCameraToSavedPosition(activeElement);
+            cameraInstance.moveCameraToSavedPosition();
             modalInstance.setActiveModalCarouselElement(oldCurrentModalImg, false);
-            // * ... Work-around (5): set the modal display to none to be consistent with the work-around n°4.
-            modalInstance.getModalElement().style.display = 'none';
+            modalInstance.getModalElement().style.display = 'none'; // * ... Work-around (5): set the modal display to none to be consistent with the work-around n°4.
           });
 
           modalCarousel.addEventListener('slide.bs.carousel', (event) => {
@@ -343,7 +340,7 @@ Object.assign(_mauGalleryManager, {
         }
 
         const relatedGalleryId = relatedGalleryInstance.id;
-        const modalCarousel = _mauGalleryManager['Modal_Instance'].getModalCarouselElement();
+        const modalCarousel = this.getModalCarouselElement();
         const galleryItemClass = _mauGalleryManager.options('galleryItemClass');
         const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
         const modalCarouselColumns = modalCarousel.querySelectorAll(`.${mauPrefixClass}.modal-${galleryItemClass}`);
@@ -376,6 +373,26 @@ Object.assign(_mauGalleryManager, {
       }
 
       modalOnOpen(element, relatedMauGalleryInstance) {
+        function saveCameraInformations() {
+          const mobileInstance = _mauGalleryManager['Mobile_Instance'];
+          const cameraInstance = _mauGalleryManager['Camera_Instance'];
+          mobileInstance.getCurrentScreenOrientation();
+          cameraInstance.saveCurrentCameraPosition();
+        }
+
+        // * ... Work-around n°3 -> Implementation
+        function lockscreenHotfix() {
+          const cameraInstance = _mauGalleryManager['Camera_Instance'];
+          if (cameraInstance.memos('curY') !== window.scrollY) {
+            cameraInstance.memos('lockScreenHasGlitched', true);
+            cameraInstance.memos('curYDelta', cameraInstance.memos('curY') - window.scrollY);
+          } else {
+            cameraInstance.memos('lockScreenHasGlitched', false);
+            cameraInstance.memos('curYDelta', 0);
+          }
+        }
+
+        saveCameraInformations();
         this.updateModalCarouselComponent(relatedMauGalleryInstance);
         let providedImg = element;
         if (element.tagName === 'PICTURE') {
@@ -421,30 +438,11 @@ Object.assign(_mauGalleryManager, {
           });
         }
 
-        const mobileInstance = _mauGalleryManager['Mobile_Instance'];
-        const cameraInstance = _mauGalleryManager['Camera_Instance'];
-        mobileInstance.getCurrentScreenOrientation();
-
         // * ... Work-around (3): Load the modal via custom Javascript to save the good old camera position value, BEFORE drawing the modal, since at least one Bootstrap's locking screen function is glitched.
-        if (cameraInstance.memos('tab')) {
-          cameraInstance.saveCurrentCameraPosition();
-        } else {
-          cameraInstance.saveCurrentCameraPosition();
-          cameraInstance.saveActiveElement();
-          cameraInstance.memos('curX', -1);
-        }
-
         const m = document.querySelector(`#${lightboxId}`);
         const bsModalSingletonInstance = bootstrap.Modal.getInstance(m) ?? new bootstrap.Modal(m);
         bsModalSingletonInstance.show();
-        // * ... Work-around n°3 -> Implementation
-        if (cameraInstance.memos('curY') !== window.scrollY) {
-          cameraInstance.memos('lockScreenHasGlitched', true);
-          cameraInstance.memos('curYDelta', cameraInstance.memos('curY') - window.scrollY);
-        } else {
-          cameraInstance.memos('lockScreenHasGlitched', false);
-          cameraInstance.memos('curYDelta', 0);
-        }
+        lockscreenHotfix(); // * ... Work-around n°3 -> Hotfix call
 
         const modalBackDrop = document.querySelector('.modal-backdrop');
         const modalInstance = _mauGalleryManager['Modal_Instance'];
@@ -457,7 +455,9 @@ Object.assign(_mauGalleryManager, {
 Object.assign(_mauGalleryManager, {
   'DOM_Manipulations':
     class DOM_Manipulations {
-      constructor() { }
+      constructor() {
+        this.memoRect = null;
+      }
 
       getAbsoluteElementY(element) {
         const bodyRect = document.body.getBoundingClientRect();
@@ -466,38 +466,59 @@ Object.assign(_mauGalleryManager, {
         return offset;
       }
 
-      getElementUpperPx(element) {
-        const getElementHeight = (element) => parseInt(window.getComputedStyle(element).height, 10);
-        const navbarElement = document.querySelector('.navbar');
-        const delta = navbarElement ? getElementHeight(navbarElement) : 0;
-        const height = getElementHeight(element) - 1;
-        const rect = element.getBoundingClientRect();
-        const computedUpPx = rect.bottom - height + delta;
+      getElementHeight(element) {
+        return parseInt(window.getComputedStyle(element).height, 10);
+      }
 
-        return computedUpPx;
+      getElementWidth(element) {
+        return parseInt(window.getComputedStyle(element).width, 10);
+      }
+
+      getElementBottomPx(element, lazy = false) {
+        const rect = lazy && this.memoRect ? this.memoRect : element.getBoundingClientRect();
+        this.memoRect = rect;
+        return rect.bottom;
+      }
+
+      getElementLeftPx(element, lazy = false) {
+        const rect = lazy && this.memoRect ? this.memoRect : element.getBoundingClientRect();
+        this.memoRect = rect;
+        return rect.left;
+      }
+
+      getElementRightPx(element, lazy = false) {
+        const rect = lazy && this.memoRect ? this.memoRect : element.getBoundingClientRect();
+        this.memoRect = rect;
+        return rect.right;
+      }
+
+      getElementTopPx(element, lazy = false) {
+        const rect = lazy && this.memoRect ? this.memoRect : element.getBoundingClientRect();
+        this.memoRect = rect;
+        return rect.top;
       }
 
       isInViewport(element, options = {}) {
-        const getElementWidth = (element) => parseInt(window.getComputedStyle(element).width, 10);
-        const width = getElementWidth(element) - 1;
-        const rect = element.getBoundingClientRect();
-        const computedUpPx = this.getElementUpperPx(element);
-        const computedLeftPx = rect.right - width;
+        const computedUpPx = this.getElementTopPx(element);
+        const beLazy = true;
+        const computedDownPx = this.getElementBottomPx(element, beLazy);
+        const computedLeftPx = this.getElementLeftPx(element, beLazy);
+        const computedRightPx = this.getElementRightPx(element, beLazy);
         const notOffscren = (computedUpPx >= 0 && computedLeftPx >= 0);
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
-        const upperLeftPixelOnScreen = (computedUpPx <= viewportHeight && computedLeftPx <= viewportWidth);
-        const bottomLeftPixelOnScreen = (rect.bottom <= viewportHeight && rect.right <= viewportWidth);
+        const topLeftPixelOnScreen = (computedUpPx <= viewportHeight && computedLeftPx <= viewportWidth);
+        const bottomRightPixelOnScreen = (computedDownPx <= viewportHeight && computedRightPx <= viewportWidth);
         let isInViewport = null;
 
         if (options['checkFullyInViewport']) {
           isInViewport = notOffscren &&
-            upperLeftPixelOnScreen &&
-            bottomLeftPixelOnScreen
+            topLeftPixelOnScreen &&
+            bottomRightPixelOnScreen
         } else {
           isInViewport = notOffscren &&
-            upperLeftPixelOnScreen ||
-            bottomLeftPixelOnScreen
+            topLeftPixelOnScreen ||
+            bottomRightPixelOnScreen
         }
 
         return isInViewport;
@@ -730,7 +751,7 @@ Object.assign(_mauGalleryManager, {
       }
 
       getGalleryInstance(galleryInstanceId) {
-        const matchingElements = this.archive.filter(({id}) => id === galleryInstanceId);
+        const matchingElements = this.archive.filter(({ id }) => id === galleryInstanceId);
         if (matchingElements.length === 0) {
           return null;
         }
@@ -752,28 +773,8 @@ Object.assign(_mauGalleryManager, {
           'curY': 0,
           'curYDelta': 0,
           'screenOrientation': null,
-          'lockScreenHasGlitched': false,
-          'tab': false,
-          'tabTimeout': null
+          'lockScreenHasGlitched': false
         }
-
-        document.addEventListener('keydown', event => {
-          const cameraInstance = this;
-
-          if (event.keyCode == 9 || event.key === 'Tab') {
-            cameraInstance.memos('tab', true);
-
-            if (cameraInstance.memos('tabTimeout')) {
-              clearTimeout(cameraInstance.memos('tabTimeout'));
-              cameraInstance.memos('tabTimeout', null)
-            }
-
-            cameraInstance.memos('tabTimeout', setTimeout(() => {
-              cameraInstance.memos('tab', false);
-              cameraInstance.memos('tabTimeout', null)
-            }, 850));
-          }
-        });
       }
 
       memos(key = undefined, value = undefined) {
@@ -786,7 +787,7 @@ Object.assign(_mauGalleryManager, {
             window.scrollTo({
               top: y,
               left: x,
-              behavior: 'auto'
+              behavior: 'smooth'
             });
           }, latency);
         }
@@ -799,60 +800,74 @@ Object.assign(_mauGalleryManager, {
         doMoveCamera(x, y, latencyToCounterpartScrollSmoothBehavior);
       }
 
-      saveActiveElement() {
-        const activeElement = document.activeElement;
-        if (activeElement) {
-          this.memos('activeElement', activeElement);
-          this.memos('activeElementAbsoluteY', _mauGalleryManager['DOM_Manipulations_Instance'].getAbsoluteElementY(activeElement));
-          this.memos('activeElementComputedBottom', parseInt(window.getComputedStyle(activeElement).bottom, 10));
-        } else {
-          this.memos('activeElement', null);
-          this.memos('activeElementAbsoluteY', null);
-          this.memos('activeElementComputedBottom', null);
-        }
-      }
-
       saveCurrentCameraPosition() {
+        function saveCurrentActiveElement(me) {
+          const activeElement = document.activeElement;
+          if (activeElement) {
+            me.memos('activeElement', activeElement);
+            me.memos('activeElementAbsoluteY', _mauGalleryManager['DOM_Manipulations_Instance'].getAbsoluteElementY(activeElement));
+            me.memos('activeElementComputedBottom', parseInt(window.getComputedStyle(activeElement).bottom, 10));
+          } else {
+            me.memos('activeElement', null);
+            me.memos('activeElementAbsoluteY', null);
+            me.memos('activeElementComputedBottom', null);
+          }
+        }
+
         this.memos('curX', window.scrollX);
         this.memos('curY', window.scrollY);
-        this.saveActiveElement();
+        saveCurrentActiveElement(this);
       }
 
-      moveCameraToSavedPosition(activeElement = null) {
-        if (this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('curYDelta') === this.memos('curY')) {
-          this.moveCamera(window.scrollX, this.memos('curY'));
-          this.memos('lockScreenHasGlitched', false);
+      moveCameraToSavedPosition(rawMove = false) {
+        function hotfix(me, activeElement) {
+          me.moveCamera(me.memos('curX'), me.memos('curY'));
+          me.memos('lockScreenHasGlitched', false);
           if (activeElement) {
             activeElement.focus({ preventScroll: true });
           }
+        }
+
+        if (rawMove) {
+          this.moveCamera(this.memos('curX'), this.memos('curY'));
           return;
         }
+        const activeElement = this.memos('activeElement');
+        const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('curYDelta') === this.memos('curY');
+        if (lockscreenGlitchCtx) {
+          hotfix(this, activeElement);
+          return;
+        }
+
         const mobileInstance = _mauGalleryManager['Mobile_Instance'];
         if (mobileInstance.isOnMobile() || !activeElement) {
           const screenOrientation = mobileInstance.getCurrentScreenOrientation();
 
           if (screenOrientation && screenOrientation != mobileInstance.getSavedScreenOrientation()) {
-            /* ToDo: fix intelligent scroll here (try to type this lib and then transpile it with terabytes of polyfills before any manual check)
-               const absoluteY = _mauGalleryManager.DOM_Manipulations_Instance.getAbsoluteElementY(activeElement);
-               alert(`test: ${absoluteY} ;; ${activeElement}`);
-               _mauGalleryManager.Camera_Instance.moveCamera(null, absoluteY); */
-          }
-          _mauGalleryManager.Camera_Instance.moveCamera(this.memos('curX'), this.memos('curY'));
-        } else if (activeElement) {
-          const DOM_Manipulations_Instance = _mauGalleryManager['DOM_Manipulations_Instance'];
-          let preventScroll = true;
-
-          if (!DOM_Manipulations_Instance.isInViewport(activeElement, { checkFullyInViewport: true })) {
-            const computedUpPx = DOM_Manipulations_Instance.getElementUpperPx(activeElement);
-            if (computedUpPx < 0) {
-              activeElement.scrollIntoView(false);
-            } else {
-              if (!DOM_Manipulations_Instance.isInViewport(activeElement)) {
-                preventScroll = false;
-              }
+            if (activeElement) {
+              activeElement.focus({ preventScroll: false });
+              return;
             }
           }
-          activeElement.focus({ preventScroll });
+          this.moveCamera(this.memos('curX'), this.memos('curY'));
+        } else if (activeElement) {
+          const DOM_Manipulations_Instance = _mauGalleryManager['DOM_Manipulations_Instance'];
+          const computedBottomPx = DOM_Manipulations_Instance.getElementBottomPx(activeElement);
+          const beLazy = true;
+          const computedTopPx = DOM_Manipulations_Instance.getElementTopPx(activeElement, beLazy);
+          const navbarElement = document.querySelector('.navbar');
+          const navbarIsInViewport = DOM_Manipulations_Instance.isInViewport(navbarElement);
+          const navbarOffset = navbarIsInViewport ? DOM_Manipulations_Instance.getElementHeight(navbarElement) * 1.10 : 0;
+          const elementIsUpper = computedBottomPx < navbarOffset;
+          const elementIsBelow = computedTopPx >= window.innerHeight;
+          if (elementIsUpper) {
+            activeElement.focus({ preventScroll: false });
+          } else if (elementIsBelow) {
+            activeElement.scrollIntoView(true);
+            activeElement.focus({ preventScroll: true });
+          } else {
+            activeElement.focus({ preventScroll: true });
+          }
         }
       }
     }
@@ -866,12 +881,22 @@ Object.assign(_mauGalleryManager, {
 
       filterByTag(relatedGalleryInstance, element) {
         function process() {
-          let tag = null;
-          let activeElementOldTop = null;
-          const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
-          const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
 
-          function forceReplayAnim() {
+          function handleCameraSideEffectsOnTagsPositionSettedToTop(relatedGalleryInstance) {
+            if (relatedGalleryInstance.options('tagsPosition') === 'top') {
+              _mauGalleryManager['Camera_Instance'].moveCameraToSavedPosition();
+            }
+          }
+
+          function handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance) {
+            if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
+              document.activeElement.scrollIntoView(false);
+            }
+          }
+
+          function forceReplayAnim(relatedGalleryInstance) {
+            const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
+            const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
             const rootNode = document.querySelector(`#${galleryRootNodeId} .${mauPrefixClass}.row`);
 
             if (!_mauGalleryManager['Mobile_Instance'].isOnMobile()) {
@@ -889,45 +914,34 @@ Object.assign(_mauGalleryManager, {
             window.requestAnimationFrame(() => rootNode.style.animationName = oldAnimationName);
           }
 
-          function updateGalleryComponent() {
+          function updateGalleryComponent(relatedGalleryInstance) {
+            const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
+            const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
             const isNotLazy = false;
             const richGalleryItems = relatedGalleryInstance.getRichGalleryItems(isNotLazy);
             const filtersActiveTagClass = relatedGalleryInstance.options('filtersActiveTagClass');
             const activeTag = document.querySelector(`#${galleryRootNodeId} .${mauPrefixClass}.${filtersActiveTagClass}`);
-            tag = element.dataset.imagesToggle;
+            const newTag = element.dataset.imagesToggle;
 
             activeTag.classList.remove(filtersActiveTagClass, 'active');
             element.classList.add(mauPrefixClass, filtersActiveTagClass, 'active');
-            if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
-              activeElementOldTop = document.activeElement.getBoundingClientRect().top;
-            }
-
             richGalleryItems.forEach(richItem => {
-              if (tag === 'all' || richItem.item.dataset.galleryTag === tag) {
+              if (newTag === 'all' || richItem.item.dataset.galleryTag === newTag) {
                 richItem.column.style.display = null;
               } else {
                 richItem.column.style.display = 'none';
               }
 
-              if (relatedGalleryInstance.options('tagsPosition') === 'top') {
-                _mauGalleryManager['Camera_Instance'].moveCameraToSavedPosition(document.activeElement);
-              }
+              handleCameraSideEffectsOnTagsPositionSettedToTop(relatedGalleryInstance);
             });
-            return activeElementOldTop;
+            return newTag;
           }
 
-          function handleCameraSideEffects() {
-            if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
-              document.activeElement.scrollIntoView(false);
-            }
-          }
-
-          _mauGalleryManager['Camera_Instance'].saveActiveElement();
           _mauGalleryManager['Camera_Instance'].saveCurrentCameraPosition();
-          forceReplayAnim();
-          updateGalleryComponent();
-          handleCameraSideEffects();
-          relatedGalleryInstance.memos('currentTag', tag);
+          forceReplayAnim(relatedGalleryInstance);
+          const newTag = updateGalleryComponent(relatedGalleryInstance);
+          handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance);
+          relatedGalleryInstance.memos('currentTag', newTag);
         }
 
         if (element.classList.contains(relatedGalleryInstance.options('filtersActiveTagClass'))) {
