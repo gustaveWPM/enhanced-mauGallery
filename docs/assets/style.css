@@ -1,5 +1,72 @@
-.mau#active-tag {
+.mau.nav-link,
+.mau.nav-link:hover {
+  transition: none
+}
+
+.nav-pills .mau.nav-link.active {
   color: #fff;
-  background-color: #363066;
+  background-color: #666130;
   border-radius: 0
+}
+
+/*----------------------*/
+/* Not interesting CSS */
+/*--------------------*/
+
+:root {
+  --navbar-height: 0;
+}
+
+.top-header {
+  width: 100%;
+  margin: auto;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(255, 255, 255, .85);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .31) 0%, rgba(255, 255, 255, .85) 100%);
+}
+
+.top-header h1 {
+  min-width: 175px
+}
+
+.top-header h1 {
+  font-size: 1.61em
+}
+
+.top-header h1 a {
+  text-decoration: none;
+  color: inherit
+}
+
+.container-fluid.top-header-navbar {
+  padding: 10px 5.2vw 10px 5.2vw
+}
+
+.top-header nav {
+  min-height: var(--navbar-height)
+}
+
+.navbar-menu li {
+  padding: 0 5px 0 5px
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+
+.navbar-nav a {
+  color: #000
+}
+
+@media (max-width:767px) {
+  .navbar .nav-item {
+    display: flex;
+    min-height: 63px;
+    align-items: center;
+    transform: scale(1.2)
+  }
 }
