@@ -918,7 +918,7 @@ Object.assign(_mauGalleryManager, {
             window.requestAnimationFrame(() => rootNode.style.animationName = oldAnimationName);
           }
 
-          function updateGalleryComponent(relatedGalleryInstance) {
+          function updateGalleryComponent(relatedGalleryInstance, element) {
             const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
             const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
             const isNotLazy = false;
@@ -937,14 +937,14 @@ Object.assign(_mauGalleryManager, {
               }
 
               handleCameraSideEffectsOnTagsPositionSettedToTop(relatedGalleryInstance);
+              handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element);
             });
             return newTag;
           }
 
           _mauGalleryManager['Camera_Instance'].saveCurrentCameraPosition();
           forceReplayAnim(relatedGalleryInstance);
-          const newTag = updateGalleryComponent(relatedGalleryInstance);
-          handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element);
+          const newTag = updateGalleryComponent(relatedGalleryInstance, element);
           relatedGalleryInstance.memos('currentTag', newTag);
         }
 
