@@ -106,7 +106,29 @@ body {
   color: #000
 }
 
-@media (max-width:767px) {
+
+.gallery .nav {
+  justify-content: center
+}
+
+@media (max-width: 1000px) {
+  .gallery .nav {
+    flex-direction: column;
+    text-align: center;
+    transform: scale(1.0125)
+  }
+
+  .gallery .nav button {
+    width: 100%
+  }
+
+  .mau.nav-link,
+  .mau.nav-link:hover {
+    transition: background-color .8s;
+  }
+}
+
+@media (max-width: 767px) {
   .navbar .nav-item {
     display: flex;
     min-height: 63px;
