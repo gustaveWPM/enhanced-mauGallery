@@ -156,7 +156,7 @@ let _asyncMauGalleryLauncher = {
           'ignoreDOMContentLoaded': true,
           'ignorePotentialInjectionSecuritiesChecks': true,
           'ASYNC_LAUNCHER_DEBUG_MODE': false,
-          'ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG': true,
+          'ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG': false,
           'needles': {
             'bootstrap': '/npm/bootstrap@'
           }

@@ -57,7 +57,7 @@ Object.assign(_mauGalleryManager, {
       throw new Error(`No value found for key: ${key}`);
     }
 
-    if (!value) {
+    if (value === undefined) {
       return _mauGalleryManager.objReader(obj, key);
     } else {
       _mauGalleryManager.objWriter(obj, key, value);
@@ -197,6 +197,7 @@ Object.assign(_mauGalleryManager, {
             cameraInstance.moveCameraToSavedPosition();
             modalInstance.setActiveModalCarouselElement(oldCurrentModalImg, false);
             modalInstance.getModalElement().style.display = 'none'; // * ... Work-around (5): set the modal display to none to be consistent with the work-around n°4.
+            cameraInstance.memos('activeGalleryPicture', null);
           });
 
           modalCarousel.addEventListener('slide.bs.carousel', (event) => {
@@ -538,13 +539,13 @@ Object.assign(_mauGalleryManager, {
   'GalleriesArchive':
     class GalleriesArchive {
       constructor() {
-        this.lastGalleryInstanceId = -1;
+        this.galleryInstanceIdCount = 0;
         this.archive = [];
       }
 
       appendGalleryInstance(galleryInstance) {
-        this.lastGalleryInstanceId += 1;
-        galleryInstance.id = this.lastGalleryInstanceId;
+        this.galleryInstanceIdCount += 1;
+        galleryInstance.id = this.galleryInstanceIdCount;
         this.initializeGalleryInstance(galleryInstance);
         this.archive.push(galleryInstance);
       }
@@ -773,7 +774,8 @@ Object.assign(_mauGalleryManager, {
           'curY': 0,
           'curYDelta': 0,
           'screenOrientation': null,
-          'lockScreenHasGlitched': false
+          'lockScreenHasGlitched': false,
+          'activeGalleryPicture': null
         }
       }
 
@@ -806,7 +808,7 @@ Object.assign(_mauGalleryManager, {
           if (activeElement) {
             me.memos('activeElement', activeElement);
             me.memos('activeElementAbsoluteY', _mauGalleryManager['DOM_Manipulations_Instance'].getAbsoluteElementY(activeElement));
-            me.memos('activeElementComputedBottom', parseInt(window.getComputedStyle(activeElement).bottom, 10));
+            me.memos('activeElementComputedBottom', _mauGalleryManager['DOM_Manipulations_Instance'].getElementBottomPx(activeElement));
           } else {
             me.memos('activeElement', null);
             me.memos('activeElementAbsoluteY', null);
@@ -820,6 +822,10 @@ Object.assign(_mauGalleryManager, {
       }
 
       moveCameraToSavedPosition(rawMove = false) {
+        function processRawMove(me) {
+          me.moveCamera(me.memos('curX'), me.memos('curY'));
+        }
+
         function hotfix(me, activeElement) {
           me.moveCamera(me.memos('curX'), me.memos('curY'));
           me.memos('lockScreenHasGlitched', false);
@@ -828,29 +834,7 @@ Object.assign(_mauGalleryManager, {
           }
         }
 
-        if (rawMove) {
-          this.moveCamera(this.memos('curX'), this.memos('curY'));
-          return;
-        }
-        const activeElement = this.memos('activeElement');
-        const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('curYDelta') === this.memos('curY');
-        if (lockscreenGlitchCtx) {
-          hotfix(this, activeElement);
-          return;
-        }
-
-        const mobileInstance = _mauGalleryManager['Mobile_Instance'];
-        if (mobileInstance.isOnMobile() || !activeElement) {
-          const screenOrientation = mobileInstance.getCurrentScreenOrientation();
-
-          if (screenOrientation && screenOrientation != mobileInstance.getSavedScreenOrientation()) {
-            if (activeElement) {
-              activeElement.focus({ preventScroll: false });
-              return;
-            }
-          }
-          this.moveCamera(this.memos('curX'), this.memos('curY'));
-        } else if (activeElement) {
+        function scrollToActiveElement(activeElement) {
           const DOM_Manipulations_Instance = _mauGalleryManager['DOM_Manipulations_Instance'];
           const computedBottomPx = DOM_Manipulations_Instance.getElementBottomPx(activeElement);
           const beLazy = true;
@@ -860,14 +844,36 @@ Object.assign(_mauGalleryManager, {
           const navbarOffset = navbarIsInViewport ? DOM_Manipulations_Instance.getElementHeight(navbarElement) * 1.10 : 0;
           const elementIsUpper = computedBottomPx < navbarOffset;
           const elementIsBelow = computedTopPx >= window.innerHeight;
+
           if (elementIsUpper) {
             activeElement.focus({ preventScroll: false });
+            return true;
           } else if (elementIsBelow) {
             activeElement.scrollIntoView(true);
             activeElement.focus({ preventScroll: true });
+            return true;
           } else {
             activeElement.focus({ preventScroll: true });
           }
+          return false;
+        }
+
+        if (rawMove) {
+          processRawMove(this);
+          return;
+        }
+
+        const activeGalleryPicture = this.memos('activeGalleryPicture');
+        const activeElement = this.memos('activeElement');
+        const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('curYDelta') === this.memos('curY');
+        let scrolled = false;
+        if (activeGalleryPicture) {
+          scrolled = scrollToActiveElement(activeGalleryPicture);
+        } else if (activeElement) {
+          scrolled = scrollToActiveElement(activeElement);
+        }
+        if (lockscreenGlitchCtx && !scrolled) {
+          activeGalleryPicture ? hotfix(this, activeGalleryPicture) : hotfix(this, activeElement);
         }
       }
     }
@@ -880,17 +886,17 @@ Object.assign(_mauGalleryManager, {
       constructor() { }
 
       filterByTag(relatedGalleryInstance, element) {
-        function process() {
-
+        function process(element) {
           function handleCameraSideEffectsOnTagsPositionSettedToTop(relatedGalleryInstance) {
             if (relatedGalleryInstance.options('tagsPosition') === 'top') {
-              _mauGalleryManager['Camera_Instance'].moveCameraToSavedPosition();
+              const rawMove = true;
+              _mauGalleryManager['Camera_Instance'].moveCameraToSavedPosition(rawMove);
             }
           }
 
-          function handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance) {
+          function handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element) {
             if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
-              document.activeElement.scrollIntoView(false);
+              element.scrollIntoView(false);
             }
           }
 
@@ -940,14 +946,14 @@ Object.assign(_mauGalleryManager, {
           _mauGalleryManager['Camera_Instance'].saveCurrentCameraPosition();
           forceReplayAnim(relatedGalleryInstance);
           const newTag = updateGalleryComponent(relatedGalleryInstance);
-          handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance);
+          handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element);
           relatedGalleryInstance.memos('currentTag', newTag);
         }
 
         if (element.classList.contains(relatedGalleryInstance.options('filtersActiveTagClass'))) {
           return;
         }
-        process();
+        process(element);
       }
 
       generateListeners(relatedGalleryInstance) {
@@ -955,6 +961,7 @@ Object.assign(_mauGalleryManager, {
         const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
         const gallery = document.querySelector(`#${galleryRootNodeId}`);
         const galleryElementNavLinks = gallery.querySelectorAll(`#${galleryRootNodeId} .tags-bar .${mauPrefixClass}.nav-link`);
+        const relatedGalleryInstanceId = relatedGalleryInstance.id;
 
         galleryElementNavLinks.forEach(navlink => navlink.addEventListener('click', event => _mauGalleryManager['AtomicGalleryManager_Instance'].filterByTag(relatedGalleryInstance, event.target)));
         if (!relatedGalleryInstance.options('lightBox')) {
@@ -974,6 +981,11 @@ Object.assign(_mauGalleryManager, {
               if (imgElement.parentNode.tagName === 'PICTURE') {
                 imgElement = imgElement.parentNode;
               }
+              let targetAnchor = event.target;
+              while (targetAnchor.tagName !== "A" && !targetAnchor.classList.contains(_mauGalleryManager.options('modalTriggerClass'))) {
+                targetAnchor = targetAnchor.parentNode;
+              }
+              _mauGalleryManager['Camera_Instance'].memos('activeGalleryPicture', targetAnchor);
               modalInstance.modalOnOpen(imgElement, relatedGalleryInstance);
             }
           });
