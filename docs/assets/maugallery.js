@@ -375,21 +375,19 @@ Object.assign(_mauGalleryManager, {
 
       modalOnOpen(element, relatedMauGalleryInstance) {
         function saveCameraInformations() {
-          const mobileInstance = _mauGalleryManager['Mobile_Instance'];
           const cameraInstance = _mauGalleryManager['Camera_Instance'];
-          mobileInstance.getCurrentScreenOrientation();
           cameraInstance.saveCurrentCameraPosition();
         }
 
         // * ... Work-around n°3 -> Implementation
         function lockscreenHotfix() {
           const cameraInstance = _mauGalleryManager['Camera_Instance'];
-          if (cameraInstance.memos('curY') !== window.scrollY) {
+          if (cameraInstance.memos('oldY') !== window.scrollY) {
             cameraInstance.memos('lockScreenHasGlitched', true);
-            cameraInstance.memos('curYDelta', cameraInstance.memos('curY') - window.scrollY);
+            cameraInstance.memos('oldYDelta', cameraInstance.memos('oldY') - window.scrollY);
           } else {
             cameraInstance.memos('lockScreenHasGlitched', false);
-            cameraInstance.memos('curYDelta', 0);
+            cameraInstance.memos('oldYDelta', 0);
           }
         }
 
@@ -770,12 +768,12 @@ Object.assign(_mauGalleryManager, {
           'activeElement': null,
           'activeElementAbsoluteY': null,
           'activeElementComputedBottom': null,
-          'curX': 0,
-          'curY': 0,
-          'curYDelta': 0,
+          'activeGalleryPicture': null,
+          'oldX': 0,
+          'oldY': 0,
+          'oldYDelta': 0,
           'screenOrientation': null,
-          'lockScreenHasGlitched': false,
-          'activeGalleryPicture': null
+          'lockScreenHasGlitched': false
         }
       }
 
@@ -816,18 +814,18 @@ Object.assign(_mauGalleryManager, {
           }
         }
 
-        this.memos('curX', window.scrollX);
-        this.memos('curY', window.scrollY);
+        this.memos('oldX', window.scrollX);
+        this.memos('oldY', window.scrollY);
         saveCurrentActiveElement(this);
       }
 
       moveCameraToSavedPosition(rawMove = false) {
         function processRawMove(me) {
-          me.moveCamera(me.memos('curX'), me.memos('curY'));
+          me.moveCamera(me.memos('oldX'), me.memos('oldY'));
         }
 
         function hotfix(me, activeElement) {
-          me.moveCamera(me.memos('curX'), me.memos('curY'));
+          me.moveCamera(me.memos('oldX'), me.memos('oldY'));
           me.memos('lockScreenHasGlitched', false);
           if (activeElement) {
             activeElement.focus({ preventScroll: true });
@@ -865,7 +863,7 @@ Object.assign(_mauGalleryManager, {
 
         const activeGalleryPicture = this.memos('activeGalleryPicture');
         const activeElement = this.memos('activeElement');
-        const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('curYDelta') === this.memos('curY');
+        const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('oldYDelta') === this.memos('oldY');
         let scrolled = false;
         if (activeGalleryPicture) {
           scrolled = scrollToActiveElement(activeGalleryPicture);
