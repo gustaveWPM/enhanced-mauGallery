@@ -657,7 +657,6 @@ let _asyncMauGalleryLauncher = {
         }
 
         this.inlineCode = undefined;
-        this.ready = undefined;
       }
     },
 
