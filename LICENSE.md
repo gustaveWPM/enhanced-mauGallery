@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2023 Enhanced mauGallery (by GustaveWPM <github.com/gustaveWPM>)
+Copyright (c) 2023 Enhanced mauGallery (by GustaveWPM <github.com/gustaveWPM>)  
 Copyright (c) 2018 mauGallery (by Eleftherios Psitopoulos <github.com/bakedbird>)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
