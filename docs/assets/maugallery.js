@@ -646,19 +646,19 @@ Object.assign(_mauGalleryManager, {
                   const columnClasses = [];
 
                   if (columns['xs']) {
-                    columnClasses.push(`col-${Math.ceil(12 / columns['xs'])}`);
+                    columnClasses.push(`col-${Math.trunc(12 / columns['xs'])}`);
                   }
                   if (columns['sm']) {
-                    columnClasses.push(`col-sm-${Math.ceil(12 / columns['sm'])}`);
+                    columnClasses.push(`col-sm-${Math.trunc(12 / columns['sm'])}`);
                   }
                   if (columns['md']) {
-                    columnClasses.push(`col-md-${Math.ceil(12 / columns['md'])}`);
+                    columnClasses.push(`col-md-${Math.trunc(12 / columns['md'])}`);
                   }
                   if (columns['lg']) {
-                    columnClasses.push(`col-lg-${Math.ceil(12 / columns['lg'])}`);
+                    columnClasses.push(`col-lg-${Math.trunc(12 / columns['lg'])}`);
                   }
                   if (columns['xl']) {
-                    columnClasses.push(`col-xl-${Math.ceil(12 / columns['xl'])}`);
+                    columnClasses.push(`col-xl-${Math.trunc(12 / columns['xl'])}`);
                   }
                   return columnClasses;
                 }
