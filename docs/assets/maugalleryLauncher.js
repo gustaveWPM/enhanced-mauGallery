@@ -160,7 +160,7 @@ let _asyncMauGalleryLauncher = {
           'needles': {
             'bootstrap': '/npm/bootstrap@'
           }
-        }
+        };
 
         this.waitCounter = 0;
         this.DOMContentLoaded = false;
@@ -298,7 +298,7 @@ let _asyncMauGalleryLauncher = {
         }
 
         async function fetchPackage(me, pkg) {
-          const isErrorResponse = (responseStatus) => responseStatus >= 400 && responseStatus <= 599
+          const isErrorResponse = (responseStatus) => responseStatus >= 400 && responseStatus <= 599;
 
           async function processFetch(pkg) {
             try {
@@ -428,7 +428,7 @@ let _asyncMauGalleryLauncher = {
               }
             }
 
-            const plainCode = `${code}\n${postInjectExecutionCallbacksCode}`
+            const plainCode = `${code}\n${postInjectExecutionCallbacksCode}`;
             const inlineScript = document.createTextNode(plainCode);
             script.appendChild(inlineScript);
 
@@ -596,7 +596,7 @@ let _asyncMauGalleryLauncher = {
               'postInjectExecutionCallbacks': me['mauGalleryCallbacks'],
               'conflictFeatures': []
             }
-          }
+          };
           return new _asyncMauGalleryLauncher.PackageCls(name, url, requiredFeatures, options);
         }
 
@@ -640,7 +640,7 @@ let _asyncMauGalleryLauncher = {
             'conflictFeatures': [],
             'killswitchOnAnyFeatureConflictPolicy': true
           }
-        }
+        };
 
         Object.assign(this.options, opt);
 

@@ -23,7 +23,7 @@ let _mauGalleryManager = {
       }
     }
   }
-}
+};
 
 // * ... Utilitary functions
 Object.assign(_mauGalleryManager, {
@@ -513,11 +513,11 @@ Object.assign(_mauGalleryManager, {
         if (options['checkFullyInViewport']) {
           isInViewport = notOffscren &&
             topLeftPixelOnScreen &&
-            bottomRightPixelOnScreen
+            bottomRightPixelOnScreen;
         } else {
           isInViewport = notOffscren &&
             topLeftPixelOnScreen ||
-            bottomRightPixelOnScreen
+            bottomRightPixelOnScreen;
         }
 
         return isInViewport;
@@ -602,7 +602,7 @@ Object.assign(_mauGalleryManager, {
                   box-shadow: none;
                   border-color: transparent;
                 }`
-            }
+            };
             Object.assign(rules, mobileRules);
           }
           Object.keys(rules).reverse().forEach(key => style.sheet.insertRule(rules[key].replace(/[\s]+/g, ' ').trim(), 0));
@@ -634,7 +634,7 @@ Object.assign(_mauGalleryManager, {
                 }
 
                 function validateColumnsObjSchema(columns) {
-                  const columnsObjSchema = { 'xs': '', 'sm': '', 'md': '', 'lg': '', 'xl': '' }
+                  const columnsObjSchema = { 'xs': '', 'sm': '', 'md': '', 'lg': '', 'xl': '' };
                   Object.keys(columns).forEach(key => {
                     if (!(key in columnsObjSchema)) {
                       throw new Error(`Unknown columns key: ${key}.`);
@@ -676,7 +676,7 @@ Object.assign(_mauGalleryManager, {
                   wrapper_child = generateWrapperChild(isImg, lightBox);
                 } else if (typeof columns === 'object') {
                   try {
-                    validateColumnsObjSchema(columns)
+                    validateColumnsObjSchema(columns);
                   } catch (error) {
                     throw error;
                   }
@@ -774,7 +774,7 @@ Object.assign(_mauGalleryManager, {
           'oldYDelta': 0,
           'screenOrientation': null,
           'lockScreenHasGlitched': false
-        }
+        };
       }
 
       memos(key = undefined, value = undefined) {
@@ -1116,7 +1116,7 @@ Object.assign(_mauGalleryManager, {
           },
           'options': mauGallerydefaults,
           'tagsSet': new Set()
-        }
+        };
 
         function assignAndLockObjs(mauProps) {
           Object.seal(mauProps);
@@ -1149,7 +1149,7 @@ Object.assign(_mauGalleryManager, {
 
         const galleryRootNodeId = this.options('galleryRootNodeId');
         const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
-        const galleryItemClass = _mauGalleryManager.options('galleryItemClass')
+        const galleryItemClass = _mauGalleryManager.options('galleryItemClass');
         const columns = document.querySelectorAll(`#${galleryRootNodeId} div.${mauPrefixClass}.item-column`);
         const dataEntries = [];
         let picture = null;
@@ -1198,7 +1198,7 @@ Object.assign(_mauGalleryManager, {
   'removePlaceholders': () => {
     const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
     const galleryPlaceHolderClass = _mauGalleryManager.options('galleryPlaceHolderClass');
-    const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`)
+    const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`);
     placeholders.forEach(element => element.remove());
   }
 });
