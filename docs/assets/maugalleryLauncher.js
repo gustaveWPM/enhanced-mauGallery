@@ -2,8 +2,10 @@ let _asyncMauGalleryLauncher = {
   'Launcher':
     class Launcher {
       constructor() {
+        this.failedToLoadMauGalleryMsg = "Failed to load MauGallery! Please, retry to load this page.";
         this.boostrapIsAsyncLoadedSomewhereElseInMyCodebasePleaseDoNotAsyncLoadItHereImBeggingYou = false;
         this.globalMauGalleryConfig = {
+          'anyImageServedByHTTP1Server': true,
           'mauPrefixClass': 'mau',
           'lightboxId': 'myAwesomeLightbox',
           'prevImgButtonLabel': 'Previous image',
@@ -590,7 +592,15 @@ let _asyncMauGalleryLauncher = {
           const requiredFeatures = me.PKGData.mauGallery['requiredFeatures'];
           const options = {
             'injectionProperties': {
-              'inlineInject': true
+              'inlineInject': true,
+              'errorCallbacks': [
+                async function failedToInjectMauGallery() {
+                  const mauPrefixClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'];
+                  const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['galleryPlaceHolderClass'];
+                  const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`);
+                  placeholders.forEach(element => element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher_Instance["failedToLoadMauGalleryMsg"]}</div>`);
+                }
+              ]
             },
             'postInject': {
               'postInjectExecutionCallbacks': me['mauGalleryCallbacks'],

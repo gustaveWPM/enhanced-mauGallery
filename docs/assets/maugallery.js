@@ -1,6 +1,7 @@
 // * ... Default global config
 let _mauGalleryManager = {
   'mauGalleryGlobalConfig': {
+    'anyImageServedByHTTP1Server': true,
     'mauPrefixClass': 'mau',
     'lightboxId': 'myAwesomeLightbox',
     'prevImgButtonLabel': 'Previous image',
@@ -82,6 +83,9 @@ Object.assign(_mauGalleryManager, {
       }
 
       cacheImgUrl(url) {
+        if (_mauGalleryManager.options('anyImageServedByHTTP1Server')) {
+          return;
+        }
         if (url === null || this.imgUrlsCache.has(url)) {
           return;
         }
