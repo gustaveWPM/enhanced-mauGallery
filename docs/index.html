@@ -39,6 +39,62 @@
   </header>
 
   <main>
+    <div id="header">
+      <div id="carouselMauGallery" class="carousel slide" data-bs-keyboard="false" data-bs-ride="carousel"
+        data-bs-interval="7500">
+        <div class="carousel-inner">
+          <button aria-label="Previous photo" class="carousel-control-prev" type="button"
+            data-bs-target="#carouselMauGallery" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button aria-label="Next photo" class="carousel-control-next" type="button"
+            data-bs-target="#carouselMauGallery" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+          <div class="carousel-indicators">
+            <div class="carousel-indicators-container">
+              <button type="button" data-bs-target="#carouselMauGallery" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+              <button type="button" data-bs-target="#carouselMauGallery" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+              <button type="button" data-bs-target="#carouselMauGallery" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+            </div>
+          </div>
+          <div class="carousel-item active">
+            <picture>
+              <source srcset="./assets/img/gallery-pack/pexels-photo-539432-mobile-portrait.webp"
+                media="(max-width: 480px)">
+              <source srcset="./assets/img/gallery-pack/pexels-photo-539432-mobile-landscape.webp"
+                media="(max-width: 1000px)">
+              <img src="./assets/img/gallery-pack/pexels-photo-539432-desktop.webp" alt="Banner (coffee photo)"
+                class="d-block w-100" width="1920" height="1080">
+            </picture>
+          </div>
+          <div class="carousel-item">
+            <picture>
+              <source srcset="./assets/img/gallery-pack/pexels-photo-59523-mobile-portrait.webp"
+                media="(max-width: 480px)">
+              <source srcset="./assets/img/gallery-pack/pexels-photo-59523-mobile-landscape.webp"
+                media="(max-width: 1000px)">
+              <img src="./assets/img/gallery-pack/pexels-photo-59523-desktop.webp" alt="Banner (dog photo)"
+                class="d-block w-100" width="1920" height="1080" loading="lazy">
+            </picture>
+          </div>
+          <div class="carousel-item">
+            <picture>
+              <source srcset="./assets/img/gallery-pack/pexels-photo-247204-mobile-portrait.webp"
+                media="(max-width: 480px)">
+              <source srcset="./assets/img/gallery-pack/pexels-photo-247204-mobile-landscape.webp"
+                media="(max-width: 1000px)">
+              <img src="./assets/img/gallery-pack/pexels-photo-247204-desktop.webp" alt="Banner (girls photo)"
+                class="d-block w-100" width="1920" height="1080" loading="lazy">
+            </picture>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="jumbotron jumbotron-fluid bg-dark mb-0">
       <div class="container py-5 text-light">
         <h2 class="display-4">Enhanced Mau Gallery (Demo)</h2>
@@ -48,6 +104,7 @@
         <a class="btn btn-outline-light btn-lg" href="https://github.com/gustaveWPM/enhanced-mauGallery">GitHub</a>
       </div>
     </div>
+
     <div class="container py-3" id="gallery-one">
       <h2 class="mt-4">Boring pictures gallery</h2>
       <div id="maugallery" class="gallery">
