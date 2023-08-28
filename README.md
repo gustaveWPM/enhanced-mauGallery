@@ -8,7 +8,7 @@ Bootstrap 5 Gallery, vanilla JS.
 
 - Removed JQuery (+ updated to Bootstrap 5.2.3)
 - Complete keyboard navigation
-- Enhanced mobiles compatibility (gonna need terabytes of polyfills to ensure this, but the lib is not typed yet...)
+- Enhanced mobiles compatibility
 - Pictures HTMLDom compatible (and also responsive images compatible)
 - Configurable CSS
 - Intelligent modal sizing
