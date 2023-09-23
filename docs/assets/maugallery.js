@@ -1,7 +1,7 @@
 // * ... Prefix Class
 let _mauGalleryManager = {
   mauGalleryGlobalConfig: {
-    mauPrefixClass: _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass']
+    mauPrefixClass: _asyncMauGalleryLauncher ? _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'] : 'mau'
   }
 };
 
@@ -32,9 +32,9 @@ Object.assign(_mauGalleryManager['mauGalleryGlobalConfig'], {
 
 // * ... Utilitary functions
 Object.assign(_mauGalleryManager, {
-  objReader: (obj, key = undefined) => {
-    if (key === undefined) {
-      return obj;
+  objReader: (obj, key) => {
+    if (typeof key !== 'string') {
+      throw new Error("'key' must be a string");
     }
 
     if (!(key in obj)) {
@@ -46,6 +46,14 @@ Object.assign(_mauGalleryManager, {
   },
 
   objWriter: (obj, key, value) => {
+    if (typeof key !== 'string') {
+      throw new Error("'key' must be a string");
+    }
+
+    if (value === undefined) {
+      throw new Error("'value' can't be 'undefined'. Use the delete operator, or set 'value' to null.");
+    }
+
     if (!(key in obj)) {
       throw new Error(`No value found for key: ${key}`);
     }
@@ -53,9 +61,9 @@ Object.assign(_mauGalleryManager, {
     obj[key] = value;
   },
 
-  objAccessor: (obj, key = undefined, value = undefined) => {
-    if (key === undefined) {
-      return obj;
+  objAccessor: (obj, key, value = undefined) => {
+    if (typeof key !== 'string') {
+      throw new Error("'key' must be a string");
     }
 
     if (!(key in obj)) {
@@ -73,9 +81,7 @@ Object.assign(_mauGalleryManager, {
 
 // * ... Accessors
 Object.assign(_mauGalleryManager, {
-  options: (key = undefined) => {
-    return _mauGalleryManager.objReader(_mauGalleryManager['mauGalleryGlobalConfig'], key);
-  }
+  options: (key) => _mauGalleryManager.objReader(_mauGalleryManager['mauGalleryGlobalConfig'], key)
 });
 
 // * ... Cache
@@ -751,7 +757,7 @@ Object.assign(_mauGalleryManager, {
       };
     }
 
-    memos(key = undefined, value = undefined) {
+    memos(key, value = undefined) {
       return _mauGalleryManager.objAccessor(this.dataMemos, key, value);
     }
 
@@ -1097,11 +1103,11 @@ Object.assign(_mauGalleryManager, {
       _mauGalleryManager['GalleriesArchive_Instance'].appendGalleryInstance(this);
     }
 
-    memos(key = undefined, value = undefined) {
+    memos(key, value = undefined) {
       return _mauGalleryManager.objAccessor(this.props['memos'], key, value);
     }
 
-    options(key = undefined, value = undefined) {
+    options(key, value = undefined) {
       return _mauGalleryManager.objAccessor(this.props['options'], key, value);
     }
 
