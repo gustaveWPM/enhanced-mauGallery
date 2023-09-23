@@ -22,7 +22,9 @@ Bootstrap 5 Gallery, vanilla JS.
 ```html
 <script src="./assets/maugalleryLauncher.js" async defer></script>
 ```
+
 ```html
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="./assets/maugallery.js" defer></script>
 ```
 
