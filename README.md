@@ -8,13 +8,14 @@ Bootstrap 5 Gallery, vanilla JS.
 
 - Removed JQuery (+ updated to Bootstrap 5.2.3)
 - Complete keyboard navigation
+- Swipable gallery modal on tablet/mobile
 - Enhanced mobiles compatibility
 - Pictures HTMLDom compatible (and also responsive images compatible)
 - Configurable CSS
 - Intelligent modal sizing
 - Intelligent scroll on modal quit
 - Some minor pagespeed optimizations (dynamic modal images lazyloading)
-- Multiple galleries on a single page feature.
+- Multiple galleries on a single page
 
 ### Demo
 
