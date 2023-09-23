@@ -16,6 +16,7 @@ Bootstrap 5 Gallery, vanilla JS.
 - Intelligent scroll on modal quit
 - Some minor pagespeed optimizations (dynamic modal images lazyloading)
 - Multiple galleries on a single page
+- Loading/disabled JS environment placeholders
 
 ## Two imports scenarios
 
