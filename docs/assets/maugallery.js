@@ -1,7 +1,7 @@
 // * ... Prefix Class
 let _mauGalleryManager = {
   mauGalleryGlobalConfig: {
-    mauPrefixClass: _asyncMauGalleryLauncher ? _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'] : 'mau'
+    mauPrefixClass: typeof _asyncMauGalleryLauncher !== 'undefined' ? _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'] : 'mau'
   }
 };
 
@@ -1180,3 +1180,31 @@ Object.assign(_mauGalleryManager, {
 
 _mauGalleryManager.removePlaceholders();
 _mauGalleryManager.appendGlobalCSS();
+
+if (typeof _asyncMauGalleryLauncher === 'undefined') {
+  _mauGalleryManager.mauGalleriesConfig = [];
+
+  document.querySelectorAll(`[data-${_mauGalleryManager.options('mauPrefixClass')}-gallery-id]`).forEach((currentGalleryInstanceDOMElement) => {
+    const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
+    const galleryRootNodeId = currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-gallery-id`);
+    const currentGalleryConfig = {
+      galleryRootNodeId,
+      lightBox: currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-lightbox`) === 'true',
+      navigation: currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-navigation`) === 'true',
+      showTags: currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-showtags`) === 'true',
+      tagsPosition: currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-tagsposition`),
+      mutableOptions: currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-mutable-options`) === 'true',
+      columns: {
+        xs: parseInt(currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-columns-xs`)),
+        sm: parseInt(currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-columns-sm`)),
+        md: parseInt(currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-columns-md`)),
+        lg: parseInt(currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-columns-lg`)),
+        xl: parseInt(currentGalleryInstanceDOMElement.getAttribute(`data-${mauPrefixClass}-columns-xl`))
+      }
+    };
+    currentGalleryInstanceDOMElement.id = galleryRootNodeId;
+    _mauGalleryManager.mauGalleriesConfig.push(currentGalleryConfig);
+  });
+
+  _mauGalleryManager.mauGalleriesConfig.forEach((conf) => new _mauGalleryManager.MauGallery(conf));
+}
