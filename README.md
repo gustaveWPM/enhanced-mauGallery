@@ -17,6 +17,15 @@ Bootstrap 5 Gallery, vanilla JS.
 - Some minor pagespeed optimizations (dynamic modal images lazyloading)
 - Multiple galleries on a single page
 
+## Two imports scenarios
+
+```html
+<script src="./assets/maugalleryLauncher.js" async defer></script>
+```
+```html
+<script src="./assets/maugallery.js" defer></script>
+```
+
 ### Demo
 
 [https://gustavewpm.github.io/enhanced-mauGallery/](https://gustavewpm.github.io/enhanced-mauGallery/)
