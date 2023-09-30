@@ -1,5 +1,5 @@
 let _asyncMauGalleryLauncher = {
-  Launcher: class Launcher {
+  LauncherCls: class LauncherCls {
     constructor() {
       this.failedToLoadMauGalleryMsg = 'Failed to load MauGallery! Please, retry to load this page.';
       this.boostrapIsAsyncLoadedSomewhereElseInMyCodebasePleaseDoNotAsyncLoadItHereImBeggingYou = false;
@@ -31,17 +31,17 @@ let _asyncMauGalleryLauncher = {
 
       this.mauGalleryCallbacks = [
         function injectGlobalConfig() {
-          Object.assign(_asyncMauGalleryLauncher.Launcher_Instance['globalMauGalleryConfig'], _mauGalleryManager['mauGalleryGlobalConfig']);
-          Object.assign(_mauGalleryManager['mauGalleryGlobalConfig'], _asyncMauGalleryLauncher.Launcher_Instance['globalMauGalleryConfig']);
+          Object.assign(_asyncMauGalleryLauncher.Launcher['globalMauGalleryConfig'], _mauGalleryManager['mauGalleryGlobalConfig']);
+          Object.assign(_mauGalleryManager['mauGalleryGlobalConfig'], _asyncMauGalleryLauncher.Launcher['globalMauGalleryConfig']);
           Object.freeze(_mauGalleryManager['mauGalleryGlobalConfig']);
         },
 
         function runMauGallery() {
           const launcherPtr = _asyncMauGalleryLauncher;
           const coroutine = setInterval(() => {
-            if (launcherPtr.Launcher_Instance['readyToMountGalleriesComponents']) {
+            if (launcherPtr.Launcher['readyToMountGalleriesComponents']) {
               clearInterval(coroutine);
-              launcherPtr.Launcher_Instance['mauGalleriesConfig'].forEach((conf) => {
+              launcherPtr.Launcher['mauGalleriesConfig'].forEach((conf) => {
                 new _mauGalleryManager.MauGallery(conf);
                 const galleryPlaceHolderClass = _mauGalleryManager.options('galleryPlaceHolderClass');
                 const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceHolderClass}`);
@@ -531,12 +531,11 @@ let _asyncMauGalleryLauncher = {
             inlineInject: true,
             errorCallbacks: [
               async function failedToInjectMauGallery() {
-                const mauPrefixClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'];
-                const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['galleryPlaceHolderClass'];
+                const mauPrefixClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig['mauPrefixClass'];
+                const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig['galleryPlaceHolderClass'];
                 const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`);
                 placeholders.forEach(
-                  (element) =>
-                    (element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher_Instance['failedToLoadMauGalleryMsg']}</div>`)
+                  (element) => (element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher['failedToLoadMauGalleryMsg']}</div>`)
                 );
               }
             ]
@@ -593,15 +592,15 @@ let _asyncMauGalleryLauncher = {
       Object.assign(this.options, opt);
 
       if (!this.options.injectionProperties['checkRequiredFeaturesTimeout']) {
-        this.options.injectionProperties['checkRequiredFeaturesTimeout'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultCheckRequiredFeaturesTimeout'];
+        this.options.injectionProperties['checkRequiredFeaturesTimeout'] = _asyncMauGalleryLauncher.Launcher.launcherConfig['defaultCheckRequiredFeaturesTimeout'];
       }
 
       if (!this.options.injectionProperties['maximumPackageFetchRetry']) {
-        this.options.injectionProperties['maximumPackageFetchRetry'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultMaximumPackageFetchRetry'];
+        this.options.injectionProperties['maximumPackageFetchRetry'] = _asyncMauGalleryLauncher.Launcher.launcherConfig['defaultMaximumPackageFetchRetry'];
       }
 
       if (!this.options.injectionProperties['retryFetchPackageDelay']) {
-        this.options.injectionProperties['retryFetchPackageDelay'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultRetryFetchPackageDelay'];
+        this.options.injectionProperties['retryFetchPackageDelay'] = _asyncMauGalleryLauncher.Launcher.launcherConfig['defaultRetryFetchPackageDelay'];
       }
 
       this.inlineCode = undefined;
@@ -621,15 +620,15 @@ let _asyncMauGalleryLauncher = {
 
 // * ... Instances
 Object.assign(_asyncMauGalleryLauncher, {
-  Launcher_Instance: new _asyncMauGalleryLauncher['Launcher']()
+  Launcher: new _asyncMauGalleryLauncher['LauncherCls']()
 });
 
 // * ... DOMContentLoaded optional handler
-if (!_asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['ignoreDOMContentLoaded']) {
+if (!_asyncMauGalleryLauncher.Launcher.launcherConfig['ignoreDOMContentLoaded']) {
   document.addEventListener('DOMContentLoaded', () => {
-    _asyncMauGalleryLauncher.Launcher_Instance['DOMContentLoaded'] = true;
+    _asyncMauGalleryLauncher.Launcher['DOMContentLoaded'] = true;
   });
 }
 
 // * ... Entry point
-_asyncMauGalleryLauncher.Launcher_Instance.loadMauGallery();
+_asyncMauGalleryLauncher.Launcher.loadMauGallery();
