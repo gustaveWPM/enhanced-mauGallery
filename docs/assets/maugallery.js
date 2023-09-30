@@ -133,18 +133,18 @@ Object.assign(_mauGalleryManager, {
                  </div>
                </div>
              </div>`;
-        document.body.innerHTML = document.body.innerHTML + lightbox;
+        document.body.innerHTML += lightbox;
       }
 
       function generateModalEventListeners(modal, modalCarousel) {
         modal.addEventListener('shown.bs.modal', (event) => {
           // * ... Work-around (1): force the keyboard navigation to be immediately available. Please, also give a look to Work-around n°2.
           const mobileInstance = _mauGalleryManager.Mobile;
-          if (!mobileInstance.isOnMobile()) {
-            const lightboxId = _mauGalleryManager.options('lightboxId');
-            const mgNextElement = event.target.querySelector(`#${lightboxId} .mg-next`);
-            mgNextElement.parentNode.focus();
-          }
+          if (mobileInstance.isOnMobile()) return;
+
+          const lightboxId = _mauGalleryManager.options('lightboxId');
+          const mgNextElement = event.target.querySelector(`#${lightboxId} .mg-next`);
+          mgNextElement.parentNode.focus();
         });
 
         modal.addEventListener('hidden.bs.modal', (event) => {
@@ -195,14 +195,14 @@ Object.assign(_mauGalleryManager, {
           this.initializeImg(currentElement, htmlAttributesWhitelist);
         }
 
-        if (currentElement) {
-          const galleryItemClass = _mauGalleryManager.options('galleryItemClass');
-          const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
-          const wrappedElement = document.createElement('div');
-          wrappedElement.classList.add(mauPrefixClass, 'carousel-item', `modal-${galleryItemClass}`);
-          wrappedElement.append(currentElement);
-          carouselElements.push(wrappedElement);
-        }
+        if (!currentElement) return;
+
+        const galleryItemClass = _mauGalleryManager.options('galleryItemClass');
+        const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
+        const wrappedElement = document.createElement('div');
+        wrappedElement.classList.add(mauPrefixClass, 'carousel-item', `modal-${galleryItemClass}`);
+        wrappedElement.append(currentElement);
+        carouselElements.push(wrappedElement);
       });
       appendModalCarouselElements(this.getCarouselElement(), carouselElements);
     }
@@ -231,7 +231,9 @@ Object.assign(_mauGalleryManager, {
         const modalCarouselElements = this.getElement().querySelectorAll(`.${_mauGalleryManager.options('mauPrefixClass')}.modal-${galleryItemClass}`);
         modalCarouselElements.forEach((element) => element.classList.remove('active'));
         carouselElement.classList.add('active');
-      } else carouselElement.classList.remove('active');
+        return;
+      }
+      carouselElement.classList.remove('active');
     }
 
     initializeImg(element, htmlAttributesWhitelist) {
@@ -299,11 +301,11 @@ Object.assign(_mauGalleryManager, {
           _mauGalleryManager.ImagesCache.cacheUrl(item.src);
           column.classList.add('carousel-item');
           column.style.display = null;
-        } else {
-          item.setAttribute('loading', 'lazy');
-          column.classList.remove('carousel-item');
-          column.style.display = 'none';
+          return;
         }
+        item.setAttribute('loading', 'lazy');
+        column.classList.remove('carousel-item');
+        column.style.display = 'none';
       });
     }
 
@@ -645,9 +647,9 @@ Object.assign(_mauGalleryManager, {
     }
 
     getGalleryInstance(galleryInstanceId) {
-      const matchingElements = this.archive.find(({ id }) => id === galleryInstanceId);
-      if (matchingElements.length === 0) return null;
-      return matchingElements[0];
+      const matchingInstance = this.archive.find(({ id }) => id === galleryInstanceId);
+      if (!matchingInstance) return null;
+      return matchingInstance;
     }
   }
 });
@@ -847,16 +849,16 @@ Object.assign(_mauGalleryManager, {
           const modalInstance = _mauGalleryManager.Modal;
           let imgElement = event.target.querySelector('img') ?? event.target;
 
-          if (relatedGalleryInstance.options('lightBox') && imgElement) {
-            if (imgElement.parentNode.tagName === 'PICTURE') imgElement = imgElement.parentNode;
+          if (!(relatedGalleryInstance.options('lightBox') && imgElement)) return;
 
-            let targetAnchor = event.target;
-            while (targetAnchor.tagName !== 'A' && !targetAnchor.classList.contains(_mauGalleryManager.options('modalTriggerClass'))) {
-              targetAnchor = targetAnchor.parentNode;
-            }
-            _mauGalleryManager.Camera.memos('activeGalleryPicture', targetAnchor);
-            modalInstance.onOpen(imgElement, relatedGalleryInstance);
+          if (imgElement.parentNode.tagName === 'PICTURE') imgElement = imgElement.parentNode;
+
+          let targetAnchor = event.target;
+          while (targetAnchor.tagName !== 'A' && !targetAnchor.classList.contains(_mauGalleryManager.options('modalTriggerClass'))) {
+            targetAnchor = targetAnchor.parentNode;
           }
+          _mauGalleryManager.Camera.memos('activeGalleryPicture', targetAnchor);
+          modalInstance.onOpen(imgElement, relatedGalleryInstance);
         });
       });
     }
@@ -1039,7 +1041,7 @@ Object.assign(_mauGalleryManager, {
       );
       const tagsRow = `<ul class="my-4 tags-bar nav nav-pills">${tagItems}</ul>`;
 
-      if (tagsPosition === 'bottom') galleryRootNode.innerHTML = galleryRootNode.innerHTML + tagsRow;
+      if (tagsPosition === 'bottom') galleryRootNode.innerHTML += tagsRow;
       else if (tagsPosition === 'top') galleryRootNode.innerHTML = tagsRow + galleryRootNode.innerHTML;
       else throw new Error(`Unknown tags position: ${tagsPosition}`);
     }

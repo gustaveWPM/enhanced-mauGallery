@@ -113,11 +113,11 @@ let _asyncMauGalleryLauncher = {
         const generatedLogMsg = `[${ctx} | ${label}]`;
         processLog(generatedLogMsg, maybeError);
         processDump(msg, maybeError);
-      } else {
-        const ctx = maybeError ? 'DEBUG ERROR' : 'DEBUG INFO';
-        const generatedLogMsg = `[${ctx} | ${label}] ${msg}`;
-        processLog(generatedLogMsg, maybeError);
+        return;
       }
+      const ctx = maybeError ? 'DEBUG ERROR' : 'DEBUG INFO';
+      const generatedLogMsg = `[${ctx} | ${label}] ${msg}`;
+      processLog(generatedLogMsg, maybeError);
     }
 
     async installer(packageAndItsDependencies) {
@@ -255,9 +255,7 @@ let _asyncMauGalleryLauncher = {
         } else if (requiredFeaturesFoundInWindow(requiredFeatures)) {
           if (me.ASYNC_LAUNCHER_DEBUG_MODE) {
             const becuzMsg = 'because ALL the following required features has been found in the `window` object:';
-            let requiredFeaturesStr = '';
-            if (me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG) requiredFeaturesStr = `(${requiredFeatures.join(', ')})`;
-            else requiredFeaturesStr = `(${requiredFeatures})`;
+            const requiredFeaturesStr = me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG ? `(${requiredFeatures.join(', ')})` : `(${requiredFeatures})`;
 
             me.debugger(`Didn't fetch ${pkg.name} ${becuzMsg} ${requiredFeaturesStr}.\n`);
           }
