@@ -1,5 +1,5 @@
 let _asyncMauGalleryLauncher = {
-  Launcher: class Launcher {
+  LauncherCls: class LauncherCls {
     constructor() {
       this.failedToLoadMauGalleryMsg = 'Failed to load MauGallery! Please, retry to load this page.';
       this.boostrapIsAsyncLoadedSomewhereElseInMyCodebasePleaseDoNotAsyncLoadItHereImBeggingYou = false;
@@ -31,17 +31,17 @@ let _asyncMauGalleryLauncher = {
 
       this.mauGalleryCallbacks = [
         function injectGlobalConfig() {
-          Object.assign(_asyncMauGalleryLauncher.Launcher_Instance['globalMauGalleryConfig'], _mauGalleryManager['mauGalleryGlobalConfig']);
-          Object.assign(_mauGalleryManager['mauGalleryGlobalConfig'], _asyncMauGalleryLauncher.Launcher_Instance['globalMauGalleryConfig']);
-          Object.freeze(_mauGalleryManager['mauGalleryGlobalConfig']);
+          Object.assign(_asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig, _mauGalleryManager.mauGalleryGlobalConfig);
+          Object.assign(_mauGalleryManager.mauGalleryGlobalConfig, _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig);
+          Object.freeze(_mauGalleryManager.mauGalleryGlobalConfig);
         },
 
         function runMauGallery() {
           const launcherPtr = _asyncMauGalleryLauncher;
           const coroutine = setInterval(() => {
-            if (launcherPtr.Launcher_Instance['readyToMountGalleriesComponents']) {
+            if (launcherPtr.Launcher.readyToMountGalleriesComponents) {
               clearInterval(coroutine);
-              launcherPtr.Launcher_Instance['mauGalleriesConfig'].forEach((conf) => {
+              launcherPtr.Launcher.mauGalleriesConfig.forEach((conf) => {
                 new _mauGalleryManager.MauGallery(conf);
                 const galleryPlaceHolderClass = _mauGalleryManager.options('galleryPlaceHolderClass');
                 const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceHolderClass}`);
@@ -71,7 +71,7 @@ let _asyncMauGalleryLauncher = {
 
       function injectGalleriesConfigs(me) {
         window.addEventListener('load', () => {
-          const mauPrefixClass = me.globalMauGalleryConfig['mauPrefixClass'];
+          const mauPrefixClass = me.globalMauGalleryConfig.mauPrefixClass;
           const galleryElements = document.querySelectorAll(`[data-${mauPrefixClass}-gallery-id]`);
           me.mauGalleriesConfig = [];
 
@@ -103,9 +103,7 @@ let _asyncMauGalleryLauncher = {
     }
 
     debugger(msg, maybeError = false) {
-      if (!this.launcherConfig['ASYNC_LAUNCHER_DEBUG_MODE']) {
-        return;
-      }
+      if (!this.launcherConfig.ASYNC_LAUNCHER_DEBUG_MODE) return;
 
       const label = 'Mau Gallery Async Loader';
       const processLog = (generatedLogMsg, maybeError) => (maybeError ? console.error(generatedLogMsg) : console.log(generatedLogMsg));
@@ -115,11 +113,11 @@ let _asyncMauGalleryLauncher = {
         const generatedLogMsg = `[${ctx} | ${label}]`;
         processLog(generatedLogMsg, maybeError);
         processDump(msg, maybeError);
-      } else {
-        const ctx = maybeError ? 'DEBUG ERROR' : 'DEBUG INFO';
-        const generatedLogMsg = `[${ctx} | ${label}] ${msg}`;
-        processLog(generatedLogMsg, maybeError);
+        return;
       }
+      const ctx = maybeError ? 'DEBUG ERROR' : 'DEBUG INFO';
+      const generatedLogMsg = `[${ctx} | ${label}] ${msg}`;
+      processLog(generatedLogMsg, maybeError);
     }
 
     async installer(packageAndItsDependencies) {
@@ -127,15 +125,15 @@ let _asyncMauGalleryLauncher = {
       const alreadyLoadedInWindowStatus = 998;
 
       function getTimerCurrentValue(me) {
-        return me['waitCounter'];
+        return me.waitCounter;
       }
 
       function increaseTimer(me, increaseAmount) {
-        me['waitCounter'] += increaseAmount;
+        me.waitCounter += increaseAmount;
       }
 
       function resetTimer(me) {
-        me['waitCounter'] = 0;
+        me.waitCounter = 0;
       }
 
       async function wait(me, ms) {
@@ -154,17 +152,13 @@ let _asyncMauGalleryLauncher = {
       function alreadyInDOM(url, needle = undefined) {
         if (needle) {
           const matchingNeedleDOMElement = document.querySelector(`script[src*="${needle}"]`);
-          if (matchingNeedleDOMElement) {
-            return matchingNeedleDOMElement;
-          }
+          if (matchingNeedleDOMElement) return matchingNeedleDOMElement;
         }
         return document.querySelector(`script[src="${url}"]`);
       }
 
       function anyRequiredFeatureFoundInWindow(requiredFeatures) {
-        if (requiredFeatures.length === 0) {
-          return false;
-        }
+        if (requiredFeatures.length === 0) return false;
 
         for (const feature of requiredFeatures) {
           try {
@@ -182,9 +176,7 @@ let _asyncMauGalleryLauncher = {
                 break;
               }
             }
-            if (!brokeTheChain) {
-              return feature;
-            }
+            if (!brokeTheChain) return feature;
           }
         }
 
@@ -192,9 +184,7 @@ let _asyncMauGalleryLauncher = {
       }
 
       function requiredFeaturesFoundInWindow(requiredFeatures) {
-        if (requiredFeatures.length === 0) {
-          return false;
-        }
+        if (requiredFeatures.length === 0) return false;
 
         for (const feature of requiredFeatures) {
           let succesfullyEvaluated = false;
@@ -203,16 +193,12 @@ let _asyncMauGalleryLauncher = {
             succesfullyEvaluated = true;
           } catch {
           } finally {
-            if (succesfullyEvaluated) {
-              continue;
-            }
+            if (succesfullyEvaluated) continue;
             const decompositionTokens = feature.split('.');
             let oldObj = {};
             for (const t of decompositionTokens) {
               oldObj = oldObj[t] ?? window[t];
-              if (!oldObj) {
-                return false;
-              }
+              if (!oldObj) return false;
             }
           }
         }
@@ -220,17 +206,15 @@ let _asyncMauGalleryLauncher = {
       }
 
       function skipPostInjectExecutionCallbacksCode(me, postInject) {
-        if (postInject['killswitchOnAnyFeatureConflictPolicy']) {
-          const conflictFeatureFound = anyRequiredFeatureFoundInWindow(postInject['conflictFeatures']);
+        if (postInject.killswitchOnAnyFeatureConflictPolicy) {
+          const conflictFeatureFound = anyRequiredFeatureFoundInWindow(postInject.conflictFeatures);
           if (conflictFeatureFound) {
             me.debugger(`Did not append the postInjectCallback: found ${conflictFeatureFound}`);
             return true;
           }
-        } else {
-          if (requiredFeaturesFoundInWindow(postInject['conflictFeatures'])) {
-            me.debugger('Did not append the postInjectCallback: found ALL the conflict features!');
-            return true;
-          }
+        } else if (requiredFeaturesFoundInWindow(postInject.conflictFeatures)) {
+          me.debugger('Did not append the postInjectCallback: found ALL the conflict features!');
+          return true;
         }
         return false;
       }
@@ -242,11 +226,9 @@ let _asyncMauGalleryLauncher = {
           try {
             const response = await fetch(url);
             if (isErrorResponse(response.status)) {
-              throw new Error(`Failed to fetch ${pkg['name']}!\nGot an error response: ${response.status}\nVisit https://http.cat to know what it means.`);
+              throw new Error(`Failed to fetch ${pkg.name}!\nGot an error response: ${response.status}\nVisit https://http.cat to know what it means.`);
             }
-            if (pkg.options.injectionProperties['inlineInject']) {
-              pkg['inlineCode'] = await response.text();
-            }
+            if (pkg.options.injectionProperties.inlineInject) pkg.inlineCode = await response.text();
           } catch (error) {
             throw error;
           }
@@ -255,9 +237,9 @@ let _asyncMauGalleryLauncher = {
         function getNeedle(me, packageName) {
           let needle = undefined;
 
-          for (const needleKey of Object.keys(me.launcherConfig['needles'])) {
+          for (const needleKey of Object.keys(me.launcherConfig.needles)) {
             if (packageName.toLowerCase().includes(needleKey)) {
-              needle = me.launcherConfig['needles'][needleKey];
+              needle = me.launcherConfig.needles[needleKey];
               break;
             }
           }
@@ -265,28 +247,24 @@ let _asyncMauGalleryLauncher = {
         }
 
         const url = pkg.url;
-        const requiredFeatures = pkg['requiredFeatures'];
-        let needle = getNeedle(me, pkg['name']);
-        if (pkg.options.injectionProperties['alreadyAsyncLoadedSomewhereElse']) {
-          me.debugger(`Didn't fetch ${pkg['name']} because of the 'alreadyAsyncLoadedSomewhereElse' injection property of this package.`);
+        const requiredFeatures = pkg.requiredFeatures;
+        const needle = getNeedle(me, pkg.name);
+        if (pkg.options.injectionProperties.alreadyAsyncLoadedSomewhereElse) {
+          me.debugger(`Didn't fetch ${pkg.name} because of the 'alreadyAsyncLoadedSomewhereElse' injection property of this package.`);
           return doNotInjectInDOMStatus;
         } else if (requiredFeaturesFoundInWindow(requiredFeatures)) {
           if (me.ASYNC_LAUNCHER_DEBUG_MODE) {
             const becuzMsg = 'because ALL the following required features has been found in the `window` object:';
-            let requiredFeaturesStr = '';
-            if (me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG) {
-              requiredFeaturesStr = `(${requiredFeatures.join(', ')})`;
-            } else {
-              requiredFeaturesStr = `(${requiredFeatures})`;
-            }
-            me.debugger(`Didn't fetch ${pkg['name']} ${becuzMsg} ${requiredFeaturesStr}.\n`);
+            const requiredFeaturesStr = me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG ? `(${requiredFeatures.join(', ')})` : `(${requiredFeatures})`;
+
+            me.debugger(`Didn't fetch ${pkg.name} ${becuzMsg} ${requiredFeaturesStr}.\n`);
           }
           return alreadyLoadedInWindowStatus;
         } else if (alreadyInDOM(url, needle)) {
           if (needle) {
-            me.debugger(`Didn't fetch ${pkg['name']} because there is a matching <script> element in the DOM (needle found in a 'src' attribute).\n(Needle: ${needle})`);
+            me.debugger(`Didn't fetch ${pkg.name} because there is a matching <script> element in the DOM (needle found in a 'src' attribute).\n(Needle: ${needle})`);
           } else {
-            me.debugger(`Didn't fetch ${pkg['name']} because there is a matching <script> element in the DOM (exactly same 'src' attribute than the package URL).\n( ${url} )`);
+            me.debugger(`Didn't fetch ${pkg.name} because there is a matching <script> element in the DOM (exactly same 'src' attribute than the package URL).\n( ${url} )`);
           }
           return doNotInjectInDOMStatus;
         } else {
@@ -300,25 +278,25 @@ let _asyncMauGalleryLauncher = {
           }
 
           let error = undefined;
-          const max = pkg.options.injectionProperties['maximumPackageFetchRetry'];
+          const max = pkg.options.injectionProperties.maximumPackageFetchRetry;
           for (let retryCounter = 1; retryCounter <= max; retryCounter++) {
             try {
               await tryFetch(pkg);
               error = undefined;
             } catch (catchedError) {
               error = catchedError;
-              await wait(me, pkg['retryFetchPackageDelay']);
+              await wait(me, pkg.retryFetchPackageDelay);
             }
             if (!error) {
               resetTimer(me);
               break;
             } else {
-              me.debugger(`Failed to fetch ${pkg['name']}. Retrying (${retryCounter}/${pkg.options.injectionProperties['maximumPackageFetchRetry']})`);
+              me.debugger(`Failed to fetch ${pkg.name}. Retrying (${retryCounter}/${pkg.options.injectionProperties.maximumPackageFetchRetry})`);
             }
           }
 
           if (error) {
-            await runCallbacksCollectionSequentially(pkg.options.injectionProperties['errorCallbacks']);
+            await runCallbacksCollectionSequentially(pkg.options.injectionProperties.errorCallbacks);
             throw error;
           }
         }
@@ -328,29 +306,15 @@ let _asyncMauGalleryLauncher = {
         function prepareScriptElement(injectionProperties) {
           const script = document.createElement('script');
           script.setAttribute('src', '');
-          if (injectionProperties['integrity']) {
-            script.integrity = injectionProperties['integrity'];
-          }
+          if (injectionProperties.integrity) script.integrity = injectionProperties.integrity;
+          if (injectionProperties.crossOrigin) script.crossOrigin = injectionProperties.crossOrigin;
+          if (injectionProperties.async !== undefined) {
+            if (injectionProperties.async) script.async = true;
+          } else script.async = true;
 
-          if (injectionProperties.crossOrigin) {
-            script.crossOrigin = injectionProperties['crossOrigin'];
-          }
-
-          if (injectionProperties['async'] !== undefined) {
-            if (injectionProperties['async']) {
-              script.async = true;
-            }
-          } else {
-            script.async = true;
-          }
-
-          if (injectionProperties['defer'] !== undefined) {
-            if (injectionProperties['defer']) {
-              script.defer = true;
-            }
-          } else {
-            script.defer = true;
-          }
+          if (injectionProperties.defer !== undefined) {
+            if (injectionProperties.defer) script.defer = true;
+          } else script.defer = true;
           return script;
         }
 
@@ -361,7 +325,7 @@ let _asyncMauGalleryLauncher = {
           const skipPostInjectCallbacks = skipPostInjectExecutionCallbacksCode(me, postInject);
           let postInjectExecutionCallbacksCode = '';
           if (!skipPostInjectCallbacks) {
-            if (Array.isArray(postInject['postInjectExecutionCallbacks'])) {
+            if (Array.isArray(postInject.postInjectExecutionCallbacks)) {
               postInject.postInjectExecutionCallbacks.forEach((f) => (postInjectExecutionCallbacksCode += `${f.toString()}\n${f.name}();\n`));
             }
           }
@@ -370,7 +334,7 @@ let _asyncMauGalleryLauncher = {
           const inlineScript = document.createTextNode(plainCode);
           script.appendChild(inlineScript);
 
-          if (!me.launcherConfig['ignorePotentialInjectionSecuritiesChecks']) {
+          if (!me.launcherConfig.ignorePotentialInjectionSecuritiesChecks) {
             if (!script.outerHTML.includes(code) || (postInjectExecutionCallbacksCode !== '' && !script.outerHTML.includes(postInjectExecutionCallbacksCode))) {
               const youBlockedMeHard = document.createElement('div');
               youBlockedMeHard.classList.add('you-blocked-me-hard');
@@ -386,44 +350,34 @@ let _asyncMauGalleryLauncher = {
           return script;
         }
 
-        if (!me.launcherConfig['ignoreDOMContentLoaded']) {
-          while (!me['DOMContentLoaded']) {
-            await wait(me, 1);
-          }
+        if (!me.launcherConfig.ignoreDOMContentLoaded) {
+          while (!me.DOMContentLoaded) await wait(me, 1);
           resetTimer(me);
         }
 
         let script = undefined;
-        if (pkg.options.injectionProperties['inlineInject']) {
-          script = getInjectInlineScriptInstance(me, pkg['inlineCode'], pkg.options['injectionProperties'], pkg.options['postInject']);
-        } else {
-          script = getInjectExternalScriptInstance(pkg['url'], pkg.options['injectionProperties']);
-        }
+        if (pkg.options.injectionProperties.inlineInject) {
+          script = getInjectInlineScriptInstance(me, pkg.inlineCode, pkg.options.injectionProperties, pkg.options.postInject);
+        } else script = getInjectExternalScriptInstance(pkg.url, pkg.options.injectionProperties);
 
         const injectablePackage = async (pkg, script) => {
           try {
             const virtualInjectedScriptInstance = await document.body.appendChild(script);
-            if (virtualInjectedScriptInstance.tagName !== 'SCRIPT') {
-              return false;
-            }
-            if (!pkg.options.injectionProperties['inlineInject']) {
-              if (pkg['url'] !== script.src || virtualInjectedScriptInstance.src !== script.src) {
-                return false;
-              }
-            } else if (virtualInjectedScriptInstance.outerHTML !== script.outerHTML) {
-              return false;
-            }
+            if (virtualInjectedScriptInstance.tagName !== 'SCRIPT') return false;
+            if (!pkg.options.injectionProperties.inlineInject) {
+              if (pkg.url !== script.src || virtualInjectedScriptInstance.src !== script.src) return false;
+            } else if (virtualInjectedScriptInstance.outerHTML !== script.outerHTML) return false;
             return true;
           } catch {
             return false;
           }
         };
 
-        if (!me.launcherConfig['ignorePotentialInjectionSecuritiesChecks']) {
+        if (!me.launcherConfig.ignorePotentialInjectionSecuritiesChecks) {
           const isInjectable = await injectablePackage(pkg, script);
           if (!isInjectable) {
             me.debugger(['Failed to inject a script, here is its dump:', script]);
-            await runCallbacksCollectionSequentially(pkg.options.injectionProperties['errorCallbacks']);
+            await runCallbacksCollectionSequentially(pkg.options.injectionProperties.errorCallbacks);
             throw new Error('Loading script in the DOM has failed!');
           }
         }
@@ -433,47 +387,43 @@ let _asyncMauGalleryLauncher = {
 
       async function dlExecPackage(me, pkg) {
         function preventDlExec(pkgOptions) {
-          if (pkgOptions['killswitchOnAnyFeatureConflictPolicy']) {
-            const conflictFeatureFound = anyRequiredFeatureFoundInWindow(pkgOptions['conflictFeatures']);
+          if (pkgOptions.killswitchOnAnyFeatureConflictPolicy) {
+            const conflictFeatureFound = anyRequiredFeatureFoundInWindow(pkgOptions.conflictFeatures);
             if (conflictFeatureFound) {
-              throw new Error(`Did not append ${pkg['name']}. Found a conflict feature: ${conflictFeatureFound}. Aborted.`);
+              throw new Error(`Did not append ${pkg.name}. Found a conflict feature: ${conflictFeatureFound}. Aborted.`);
             }
-          } else {
-            if (requiredFeaturesFoundInWindow(pkgOptions['conflictFeatures'])) {
-              throw new Error(`Did not append ${pkg['name']}. Found ALL its conflicts features in window!`);
-            }
+          } else if (requiredFeaturesFoundInWindow(pkgOptions.conflictFeatures)) {
+            throw new Error(`Did not append ${pkg.name}. Found ALL its conflicts features in window!`);
           }
         }
 
         try {
           try {
-            preventDlExec(pkg['options']);
+            preventDlExec(pkg.options);
           } catch (error) {
             throw error;
           }
 
           const fetchResponse = await fetchPackage(me, pkg);
           if (fetchResponse === doNotInjectInDOMStatus || fetchResponse === alreadyLoadedInWindowStatus) {
-            me.debugger(`Didn't inject ${pkg['name']}.`);
-          } else {
-            await injectPackageScriptInDOM(me, pkg);
-          }
+            me.debugger(`Didn't inject ${pkg.name}.`);
+          } else await injectPackageScriptInDOM(me, pkg);
 
-          if (!pkg.options.injectionProperties['inlineInject']) {
+          if (!pkg.options.injectionProperties.inlineInject) {
             if (fetchResponse != doNotInjectInDOMStatus && fetchResponse != alreadyLoadedInWindowStatus) {
-              while (!requiredFeaturesFoundInWindow(pkg['requiredFeatures'])) {
+              while (!requiredFeaturesFoundInWindow(pkg.requiredFeatures)) {
                 await wait(me, 5);
-                if (getTimerCurrentValue(me) > pkg.options.injectionProperties['checkRequiredFeaturesTimeout']) {
+                if (getTimerCurrentValue(me) > pkg.options.injectionProperties.checkRequiredFeaturesTimeout) {
                   throw new Error('Check required features timed out!');
                 }
               }
-              const postInject = pkg.options['postInject'];
-              me.debugger(`Fully checked ${pkg['name']} required features in ~${getTimerCurrentValue(me)}ms.`);
+              const postInject = pkg.options.postInject;
+              me.debugger(`Fully checked ${pkg.name} required features in ~${getTimerCurrentValue(me)}ms.`);
               resetTimer(me);
               const skip = skipPostInjectExecutionCallbacksCode(this, postInject);
               if (!skip) {
-                runCallbacksCollectionSequentially(pkg.options.postInject['postInjectExecutionCallbacks']);
-                me.debugger(`Ran ${pkg['name']} post-inject payloads.`);
+                runCallbacksCollectionSequentially(pkg.options.postInject.postInjectExecutionCallbacks);
+                me.debugger(`Ran ${pkg.name} post-inject payloads.`);
               }
             }
           }
@@ -482,7 +432,7 @@ let _asyncMauGalleryLauncher = {
         }
       }
 
-      for (const p of packageAndItsDependencies['dependencies']) {
+      for (const p of packageAndItsDependencies.dependencies) {
         try {
           this.debugger(['Called dlExecPackage(Package), here is the dump of Package:', p]);
           await dlExecPackage(this, p);
@@ -492,8 +442,8 @@ let _asyncMauGalleryLauncher = {
       }
 
       try {
-        this.debugger(['Called dlExecPackage(Package), here is the dump of Package:', packageAndItsDependencies['targetPackage']]);
-        await dlExecPackage(this, packageAndItsDependencies['targetPackage']);
+        this.debugger(['Called dlExecPackage(Package), here is the dump of Package:', packageAndItsDependencies.targetPackage]);
+        await dlExecPackage(this, packageAndItsDependencies.targetPackage);
       } catch (error) {
         throw error;
       }
@@ -505,44 +455,43 @@ let _asyncMauGalleryLauncher = {
       }
 
       function getBootstrapPackageObj(me) {
-        const name = me.PKGData.bootstrap['name'];
-        const url = me.PKGData.bootstrap['url'];
-        const requiredFeatures = me.PKGData.bootstrap['requiredFeatures'];
+        const name = me.PKGData.bootstrap.name;
+        const url = me.PKGData.bootstrap.url;
+        const requiredFeatures = me.PKGData.bootstrap.requiredFeatures;
         const options = {
           injectionProperties: {
             alreadyAsyncLoadedSomewhereElse: me['boostrapIsAsyncLoadedSomewhereElseInMyCodebasePleaseDoNotAsyncLoadItHereImBeggingYou'],
-            crossOrigin: me.PKGData.bootstrap['crossorigin'],
-            integrity: me.PKGData.bootstrap['integrity']
+            crossOrigin: me.PKGData.bootstrap.crossorigin,
+            integrity: me.PKGData.bootstrap.integrity
           }
         };
-        const customAsyncBootstrapTimeout = me.launcherConfig['customAsyncBootstrapLoadTimeout'];
+        const customAsyncBootstrapTimeout = me.launcherConfig.customAsyncBootstrapLoadTimeout;
         if (customAsyncBootstrapTimeout) {
-          options.injectionProperties['defaultCheckRequiredFeaturesTimeout'] = customAsyncBootstrapTimeout;
+          options.injectionProperties.defaultCheckRequiredFeaturesTimeout = customAsyncBootstrapTimeout;
         }
         return new _asyncMauGalleryLauncher.PackageCls(name, url, requiredFeatures, options);
       }
 
       function getMauGalleryPackageObj(me) {
-        const name = me.PKGData.mauGallery['name'];
-        const url = me.PKGData.mauGallery['url'];
-        const requiredFeatures = me.PKGData.mauGallery['requiredFeatures'];
+        const name = me.PKGData.mauGallery.name;
+        const url = me.PKGData.mauGallery.url;
+        const requiredFeatures = me.PKGData.mauGallery.requiredFeatures;
         const options = {
           injectionProperties: {
             inlineInject: true,
             errorCallbacks: [
               async function failedToInjectMauGallery() {
-                const mauPrefixClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['mauPrefixClass'];
-                const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher_Instance.globalMauGalleryConfig['galleryPlaceHolderClass'];
+                const mauPrefixClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.mauPrefixClass;
+                const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.galleryPlaceHolderClass;
                 const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`);
                 placeholders.forEach(
-                  (element) =>
-                    (element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher_Instance['failedToLoadMauGalleryMsg']}</div>`)
+                  (element) => (element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher.failedToLoadMauGalleryMsg}</div>`)
                 );
               }
             ]
           },
           postInject: {
-            postInjectExecutionCallbacks: me['mauGalleryCallbacks'],
+            postInjectExecutionCallbacks: me.mauGalleryCallbacks,
             conflictFeatures: []
           }
         };
@@ -592,16 +541,16 @@ let _asyncMauGalleryLauncher = {
 
       Object.assign(this.options, opt);
 
-      if (!this.options.injectionProperties['checkRequiredFeaturesTimeout']) {
-        this.options.injectionProperties['checkRequiredFeaturesTimeout'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultCheckRequiredFeaturesTimeout'];
+      if (!this.options.injectionProperties.checkRequiredFeaturesTimeout) {
+        this.options.injectionProperties.checkRequiredFeaturesTimeout = _asyncMauGalleryLauncher.Launcher.launcherConfig.defaultCheckRequiredFeaturesTimeout;
       }
 
-      if (!this.options.injectionProperties['maximumPackageFetchRetry']) {
-        this.options.injectionProperties['maximumPackageFetchRetry'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultMaximumPackageFetchRetry'];
+      if (!this.options.injectionProperties.maximumPackageFetchRetry) {
+        this.options.injectionProperties.maximumPackageFetchRetry = _asyncMauGalleryLauncher.Launcher.launcherConfig.defaultMaximumPackageFetchRetry;
       }
 
-      if (!this.options.injectionProperties['retryFetchPackageDelay']) {
-        this.options.injectionProperties['retryFetchPackageDelay'] = _asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['defaultRetryFetchPackageDelay'];
+      if (!this.options.injectionProperties.retryFetchPackageDelay) {
+        this.options.injectionProperties.retryFetchPackageDelay = _asyncMauGalleryLauncher.Launcher.launcherConfig.defaultRetryFetchPackageDelay;
       }
 
       this.inlineCode = undefined;
@@ -612,24 +561,20 @@ let _asyncMauGalleryLauncher = {
     constructor(targetPackage, dependencies) {
       this.targetPackage = targetPackage;
       this.dependencies = new Set();
-      dependencies.forEach((dependency) => {
-        this.dependencies.add(dependency);
-      });
+      dependencies.forEach((dependency) => this.dependencies.add(dependency));
     }
   }
 };
 
 // * ... Instances
 Object.assign(_asyncMauGalleryLauncher, {
-  Launcher_Instance: new _asyncMauGalleryLauncher['Launcher']()
+  Launcher: new _asyncMauGalleryLauncher.LauncherCls()
 });
 
 // * ... DOMContentLoaded optional handler
-if (!_asyncMauGalleryLauncher.Launcher_Instance.launcherConfig['ignoreDOMContentLoaded']) {
-  document.addEventListener('DOMContentLoaded', () => {
-    _asyncMauGalleryLauncher.Launcher_Instance['DOMContentLoaded'] = true;
-  });
+if (!_asyncMauGalleryLauncher.Launcher.launcherConfig.ignoreDOMContentLoaded) {
+  document.addEventListener('DOMContentLoaded', () => (_asyncMauGalleryLauncher.Launcher.DOMContentLoaded = true));
 }
 
 // * ... Entry point
-_asyncMauGalleryLauncher.Launcher_Instance.loadMauGallery();
+_asyncMauGalleryLauncher.Launcher.loadMauGallery();
