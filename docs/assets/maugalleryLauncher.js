@@ -103,9 +103,7 @@ let _asyncMauGalleryLauncher = {
     }
 
     debugger(msg, maybeError = false) {
-      if (!this.launcherConfig.ASYNC_LAUNCHER_DEBUG_MODE) {
-        return;
-      }
+      if (!this.launcherConfig.ASYNC_LAUNCHER_DEBUG_MODE) return;
 
       const label = 'Mau Gallery Async Loader';
       const processLog = (generatedLogMsg, maybeError) => (maybeError ? console.error(generatedLogMsg) : console.log(generatedLogMsg));
@@ -154,17 +152,13 @@ let _asyncMauGalleryLauncher = {
       function alreadyInDOM(url, needle = undefined) {
         if (needle) {
           const matchingNeedleDOMElement = document.querySelector(`script[src*="${needle}"]`);
-          if (matchingNeedleDOMElement) {
-            return matchingNeedleDOMElement;
-          }
+          if (matchingNeedleDOMElement) return matchingNeedleDOMElement;
         }
         return document.querySelector(`script[src="${url}"]`);
       }
 
       function anyRequiredFeatureFoundInWindow(requiredFeatures) {
-        if (requiredFeatures.length === 0) {
-          return false;
-        }
+        if (requiredFeatures.length === 0) return false;
 
         for (const feature of requiredFeatures) {
           try {
@@ -182,9 +176,7 @@ let _asyncMauGalleryLauncher = {
                 break;
               }
             }
-            if (!brokeTheChain) {
-              return feature;
-            }
+            if (!brokeTheChain) return feature;
           }
         }
 
@@ -192,9 +184,7 @@ let _asyncMauGalleryLauncher = {
       }
 
       function requiredFeaturesFoundInWindow(requiredFeatures) {
-        if (requiredFeatures.length === 0) {
-          return false;
-        }
+        if (requiredFeatures.length === 0) return false;
 
         for (const feature of requiredFeatures) {
           let succesfullyEvaluated = false;
@@ -203,16 +193,12 @@ let _asyncMauGalleryLauncher = {
             succesfullyEvaluated = true;
           } catch {
           } finally {
-            if (succesfullyEvaluated) {
-              continue;
-            }
+            if (succesfullyEvaluated) continue;
             const decompositionTokens = feature.split('.');
             let oldObj = {};
             for (const t of decompositionTokens) {
               oldObj = oldObj[t] ?? window[t];
-              if (!oldObj) {
-                return false;
-              }
+              if (!oldObj) return false;
             }
           }
         }
@@ -226,11 +212,9 @@ let _asyncMauGalleryLauncher = {
             me.debugger(`Did not append the postInjectCallback: found ${conflictFeatureFound}`);
             return true;
           }
-        } else {
-          if (requiredFeaturesFoundInWindow(postInject.conflictFeatures)) {
-            me.debugger('Did not append the postInjectCallback: found ALL the conflict features!');
-            return true;
-          }
+        } else if (requiredFeaturesFoundInWindow(postInject.conflictFeatures)) {
+          me.debugger('Did not append the postInjectCallback: found ALL the conflict features!');
+          return true;
         }
         return false;
       }
@@ -244,9 +228,7 @@ let _asyncMauGalleryLauncher = {
             if (isErrorResponse(response.status)) {
               throw new Error(`Failed to fetch ${pkg.name}!\nGot an error response: ${response.status}\nVisit https://http.cat to know what it means.`);
             }
-            if (pkg.options.injectionProperties.inlineInject) {
-              pkg.inlineCode = await response.text();
-            }
+            if (pkg.options.injectionProperties.inlineInject) pkg.inlineCode = await response.text();
           } catch (error) {
             throw error;
           }
@@ -266,7 +248,7 @@ let _asyncMauGalleryLauncher = {
 
         const url = pkg.url;
         const requiredFeatures = pkg.requiredFeatures;
-        let needle = getNeedle(me, pkg.name);
+        const needle = getNeedle(me, pkg.name);
         if (pkg.options.injectionProperties.alreadyAsyncLoadedSomewhereElse) {
           me.debugger(`Didn't fetch ${pkg.name} because of the 'alreadyAsyncLoadedSomewhereElse' injection property of this package.`);
           return doNotInjectInDOMStatus;
@@ -274,11 +256,9 @@ let _asyncMauGalleryLauncher = {
           if (me.ASYNC_LAUNCHER_DEBUG_MODE) {
             const becuzMsg = 'because ALL the following required features has been found in the `window` object:';
             let requiredFeaturesStr = '';
-            if (me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG) {
-              requiredFeaturesStr = `(${requiredFeatures.join(', ')})`;
-            } else {
-              requiredFeaturesStr = `(${requiredFeatures})`;
-            }
+            if (me.ASYNC_LAUNCHER_DEBUG_MODE_FORMATTED_MSG) requiredFeaturesStr = `(${requiredFeatures.join(', ')})`;
+            else requiredFeaturesStr = `(${requiredFeatures})`;
+
             me.debugger(`Didn't fetch ${pkg.name} ${becuzMsg} ${requiredFeaturesStr}.\n`);
           }
           return alreadyLoadedInWindowStatus;
@@ -328,29 +308,15 @@ let _asyncMauGalleryLauncher = {
         function prepareScriptElement(injectionProperties) {
           const script = document.createElement('script');
           script.setAttribute('src', '');
-          if (injectionProperties.integrity) {
-            script.integrity = injectionProperties.integrity;
-          }
-
-          if (injectionProperties.crossOrigin) {
-            script.crossOrigin = injectionProperties.crossOrigin;
-          }
-
+          if (injectionProperties.integrity) script.integrity = injectionProperties.integrity;
+          if (injectionProperties.crossOrigin) script.crossOrigin = injectionProperties.crossOrigin;
           if (injectionProperties.async !== undefined) {
-            if (injectionProperties.async) {
-              script.async = true;
-            }
-          } else {
-            script.async = true;
-          }
+            if (injectionProperties.async) script.async = true;
+          } else script.async = true;
 
           if (injectionProperties.defer !== undefined) {
-            if (injectionProperties.defer) {
-              script.defer = true;
-            }
-          } else {
-            script.defer = true;
-          }
+            if (injectionProperties.defer) script.defer = true;
+          } else script.defer = true;
           return script;
         }
 
@@ -387,32 +353,22 @@ let _asyncMauGalleryLauncher = {
         }
 
         if (!me.launcherConfig.ignoreDOMContentLoaded) {
-          while (!me.DOMContentLoaded) {
-            await wait(me, 1);
-          }
+          while (!me.DOMContentLoaded) await wait(me, 1);
           resetTimer(me);
         }
 
         let script = undefined;
         if (pkg.options.injectionProperties.inlineInject) {
           script = getInjectInlineScriptInstance(me, pkg.inlineCode, pkg.options.injectionProperties, pkg.options.postInject);
-        } else {
-          script = getInjectExternalScriptInstance(pkg.url, pkg.options.injectionProperties);
-        }
+        } else script = getInjectExternalScriptInstance(pkg.url, pkg.options.injectionProperties);
 
         const injectablePackage = async (pkg, script) => {
           try {
             const virtualInjectedScriptInstance = await document.body.appendChild(script);
-            if (virtualInjectedScriptInstance.tagName !== 'SCRIPT') {
-              return false;
-            }
+            if (virtualInjectedScriptInstance.tagName !== 'SCRIPT') return false;
             if (!pkg.options.injectionProperties.inlineInject) {
-              if (pkg.url !== script.src || virtualInjectedScriptInstance.src !== script.src) {
-                return false;
-              }
-            } else if (virtualInjectedScriptInstance.outerHTML !== script.outerHTML) {
-              return false;
-            }
+              if (pkg.url !== script.src || virtualInjectedScriptInstance.src !== script.src) return false;
+            } else if (virtualInjectedScriptInstance.outerHTML !== script.outerHTML) return false;
             return true;
           } catch {
             return false;
@@ -438,10 +394,8 @@ let _asyncMauGalleryLauncher = {
             if (conflictFeatureFound) {
               throw new Error(`Did not append ${pkg.name}. Found a conflict feature: ${conflictFeatureFound}. Aborted.`);
             }
-          } else {
-            if (requiredFeaturesFoundInWindow(pkgOptions.conflictFeatures)) {
-              throw new Error(`Did not append ${pkg.name}. Found ALL its conflicts features in window!`);
-            }
+          } else if (requiredFeaturesFoundInWindow(pkgOptions.conflictFeatures)) {
+            throw new Error(`Did not append ${pkg.name}. Found ALL its conflicts features in window!`);
           }
         }
 
@@ -455,9 +409,7 @@ let _asyncMauGalleryLauncher = {
           const fetchResponse = await fetchPackage(me, pkg);
           if (fetchResponse === doNotInjectInDOMStatus || fetchResponse === alreadyLoadedInWindowStatus) {
             me.debugger(`Didn't inject ${pkg.name}.`);
-          } else {
-            await injectPackageScriptInDOM(me, pkg);
-          }
+          } else await injectPackageScriptInDOM(me, pkg);
 
           if (!pkg.options.injectionProperties.inlineInject) {
             if (fetchResponse != doNotInjectInDOMStatus && fetchResponse != alreadyLoadedInWindowStatus) {
@@ -611,9 +563,7 @@ let _asyncMauGalleryLauncher = {
     constructor(targetPackage, dependencies) {
       this.targetPackage = targetPackage;
       this.dependencies = new Set();
-      dependencies.forEach((dependency) => {
-        this.dependencies.add(dependency);
-      });
+      dependencies.forEach((dependency) => this.dependencies.add(dependency));
     }
   }
 };
@@ -625,9 +575,7 @@ Object.assign(_asyncMauGalleryLauncher, {
 
 // * ... DOMContentLoaded optional handler
 if (!_asyncMauGalleryLauncher.Launcher.launcherConfig.ignoreDOMContentLoaded) {
-  document.addEventListener('DOMContentLoaded', () => {
-    _asyncMauGalleryLauncher.Launcher.DOMContentLoaded = true;
-  });
+  document.addEventListener('DOMContentLoaded', () => (_asyncMauGalleryLauncher.Launcher.DOMContentLoaded = true));
 }
 
 // * ... Entry point

@@ -33,41 +33,23 @@ Object.assign(_mauGalleryManager.mauGalleryGlobalConfig, {
 // * ... Utilitary functions
 Object.assign(_mauGalleryManager, {
   objReader: (obj, key) => {
-    if (typeof key !== 'string') {
-      throw new Error("'key' must be a string");
-    }
-
-    if (!(key in obj)) {
-      throw new Error(`No value found for key: ${key}`);
-    }
-
-    const value = obj[key];
-    return value;
+    if (typeof key !== 'string') throw new Error("'key' must be a string");
+    if (!(key in obj)) throw new Error(`No value found for key: ${key}`);
+    return obj[key];
   },
 
   objWriter: (obj, key, value) => {
-    if (typeof key !== 'string') {
-      throw new Error("'key' must be a string");
-    }
-
-    if (value === undefined) {
-      throw new Error("'value' can't be 'undefined'. Use the delete operator, or set 'value' to null.");
-    }
-
-    if (!(key in obj)) {
-      throw new Error(`No value found for key: ${key}`);
-    }
+    if (typeof key !== 'string') throw new Error("'key' must be a string");
+    if (value === undefined) throw new Error("'value' can't be 'undefined'. Use the delete operator, or set 'value' to null.");
+    if (!(key in obj)) throw new Error(`No value found for key: ${key}`);
 
     obj[key] = value;
   },
 
   objAccessor: (obj, key, value = undefined) => {
-    if (value === undefined) {
-      return _mauGalleryManager.objReader(obj, key);
-    } else {
-      _mauGalleryManager.objWriter(obj, key, value);
-      return void 0;
-    }
+    if (value === undefined) return _mauGalleryManager.objReader(obj, key);
+    else _mauGalleryManager.objWriter(obj, key, value);
+    return void 0;
   }
 });
 
@@ -84,24 +66,18 @@ Object.assign(_mauGalleryManager, {
     }
 
     cacheUrl(url) {
-      if (_mauGalleryManager.options('anyImageServedByHTTP1Server')) {
-        return;
-      }
-      if (url === null || this.imgUrlsCache.has(url)) {
-        return;
-      }
+      if (_mauGalleryManager.options('anyImageServedByHTTP1Server')) return;
+      if (url === null || this.imgUrlsCache.has(url)) return;
+
       const isValid = (token) => token.includes('/') || token.includes('.');
-      if (!isValid(url)) {
-        return;
-      }
+      if (!isValid(url)) return;
+
       fetch(url);
       this.imgUrlsCache.add(url);
     }
 
     cacheUrls(tokensList) {
-      if (tokensList === null) {
-        return;
-      }
+      if (tokensList === null) return;
       tokensList.forEach((token) => this.cacheUrl(token));
     }
   }
@@ -184,16 +160,12 @@ Object.assign(_mauGalleryManager, {
 
         modalCarousel.addEventListener('slide.bs.carousel', (event) => {
           // * ... Bootstrap Hotfix
-          if (event.target.dataset.bsTouch === 'false') {
-            event.preventDefault();
-          }
+          if (event.target.dataset.bsTouch === 'false') event.preventDefault();
 
           const m = document.querySelector(`#${_mauGalleryManager.options('lightboxId')}`);
           const bsModalSingletonInstance = bootstrap.Modal.getInstance(m);
 
-          if (bsModalSingletonInstance && bsModalSingletonInstance._isTransitioning) {
-            event.preventDefault();
-          }
+          if (bsModalSingletonInstance && bsModalSingletonInstance._isTransitioning) event.preventDefault();
         });
       }
 
@@ -238,8 +210,7 @@ Object.assign(_mauGalleryManager, {
     getElement() {
       const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
       const lightboxId = _mauGalleryManager.options('lightboxId');
-      const modal = document.querySelector(`.${mauPrefixClass}#${lightboxId}`);
-      return modal;
+      return document.querySelector(`.${mauPrefixClass}#${lightboxId}`);
     }
 
     getCurrentImage(modal) {
@@ -249,8 +220,7 @@ Object.assign(_mauGalleryManager, {
     }
 
     getCarouselElement() {
-      const modalCarousel = document.querySelector(`#${_mauGalleryManager.options('lightboxId')}-carousel`);
-      return modalCarousel;
+      return document.querySelector(`#${_mauGalleryManager.options('lightboxId')}-carousel`);
     }
 
     setActiveCarouselElement(element, activationState = true) {
@@ -261,9 +231,7 @@ Object.assign(_mauGalleryManager, {
         const modalCarouselElements = this.getElement().querySelectorAll(`.${_mauGalleryManager.options('mauPrefixClass')}.modal-${galleryItemClass}`);
         modalCarouselElements.forEach((element) => element.classList.remove('active'));
         carouselElement.classList.add('active');
-      } else {
-        carouselElement.classList.remove('active');
-      }
+      } else carouselElement.classList.remove('active');
     }
 
     initializeImg(element, htmlAttributesWhitelist) {
@@ -272,9 +240,7 @@ Object.assign(_mauGalleryManager, {
         for (let i = 0, attrs = element.attributes; attrs[i]; i++) {
           const attrKey = attrs[i].nodeName;
 
-          if (htmlAttributesWhitelist.indexOf(attrKey) === -1) {
-            toRemove.push(attrKey);
-          }
+          if (htmlAttributesWhitelist.indexOf(attrKey) === -1) toRemove.push(attrKey);
         }
         toRemove.forEach((attrKey) => element.removeAttribute(attrKey));
       }
@@ -287,13 +253,8 @@ Object.assign(_mauGalleryManager, {
       element.setAttribute('alt', alt);
       element.setAttribute('loading', 'lazy');
 
-      if (srcset) {
-        element.setAttribute('srcset', srcset);
-      }
-
-      if (sizes) {
-        element.setAttribute('sizes', sizes);
-      }
+      if (srcset) element.setAttribute('srcset', srcset);
+      if (sizes) element.setAttribute('sizes', sizes);
 
       element.style.maxWidth = '85vw';
       element.style.maxHeight = '85vh';
@@ -308,14 +269,10 @@ Object.assign(_mauGalleryManager, {
     }
 
     updateCarouselComponent(relatedGalleryInstance) {
-      if (!relatedGalleryInstance.options('lightBox')) {
-        return;
-      }
+      if (!relatedGalleryInstance.options('lightBox')) return;
 
       let tag = relatedGalleryInstance.memos('currentTag');
-      if (tag === null) {
-        tag = 'all';
-      }
+      if (tag === null) tag = 'all';
 
       const relatedGalleryId = relatedGalleryInstance.id;
       const modalCarousel = this.getCarouselElement();
@@ -370,10 +327,7 @@ Object.assign(_mauGalleryManager, {
 
       saveCameraInformations();
       this.updateCarouselComponent(relatedMauGalleryInstance);
-      let providedImg = element;
-      if (element.tagName === 'PICTURE') {
-        providedImg = element.querySelector('img');
-      }
+      const providedImg = element.tagName === 'PICTURE' ? element.querySelector('img') : element;
       const modal = this.getElement();
       const modalImgs = modal.querySelectorAll('img');
       for (const modalImg of modalImgs) {
@@ -437,8 +391,7 @@ Object.assign(_mauGalleryManager, {
     getAbsoluteElementY(element) {
       const bodyRect = document.body.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
-      const offset = elementRect.top - bodyRect.top;
-      return offset;
+      return elementRect.top - bodyRect.top;
     }
 
     getElementHeight(element) {
@@ -516,16 +469,14 @@ Object.assign(_mauGalleryManager, {
     initializeGalleryInstance(galleryInstance) {
       function appendGalleryInstanceCSS(galleryInstance) {
         const style = (() => {
-          let style = document.createElement('style');
+          const style = document.createElement('style');
           style.appendChild(document.createTextNode(''));
           document.head.appendChild(style);
           return style;
         })();
 
         const optionsStyles = galleryInstance.options('styles');
-        function animationStyleProperty(animationCategory, key) {
-          return optionsStyles.animation[animationCategory][key];
-        }
+        const animationStyleProperty = (animationCategory, key) => optionsStyles.animation[animationCategory][key];
 
         const animationName = animationStyleProperty('gallery', 'animationName');
         const animationKeyframes = animationStyleProperty('gallery', 'animationKeyframes');
@@ -588,20 +539,17 @@ Object.assign(_mauGalleryManager, {
                   wrapper_child.style.textDecoration = 'none';
                   wrapper_child.style.color = 'inherit';
                   return wrapper_child;
-                } else {
-                  const wrapper_child = document.createElement('div');
-                  wrapper_child.setAttribute('tabindex', '0');
-                  wrapper_child.classList.add('w-100', 'h-100');
-                  return wrapper_child;
                 }
+                const wrapper_child = document.createElement('div');
+                wrapper_child.setAttribute('tabindex', '0');
+                wrapper_child.classList.add('w-100', 'h-100');
+                return wrapper_child;
               }
 
               function validateColumnsObjSchema(columns) {
-                const columnsObjSchema = { xs: '', sm: '', md: '', lg: '', xl: '' };
+                const columnsObjKeys = ['xs', 'sm', 'md', 'lg', 'xl'];
                 Object.keys(columns).forEach((key) => {
-                  if (!(key in columnsObjSchema)) {
-                    throw new Error(`Unknown columns key: ${key}.`);
-                  }
+                  if (!columnsObjKeys.includes(key)) throw new Error(`Unknown columns key: ${key}.`);
                 });
               }
 
@@ -639,9 +587,8 @@ Object.assign(_mauGalleryManager, {
                 wrapper = document.createElement('div');
                 wrapper.classList.add(mauPrefixClass, 'item-column', ...columnClasses, 'position-relative', 'mb-0', 'p-0');
                 wrapper_child = generateWrapperChild(isImg, lightBox);
-              } else {
-                throw new Error(`Columns should be defined as numbers or objects. ${typeof columns} is not supported.`);
-              }
+              } else throw new Error(`Columns should be defined as numbers or objects. ${typeof columns} is not supported.`);
+
               _mauGalleryManager.DomManipulations.wrap(element, wrapper_child);
               _mauGalleryManager.DomManipulations.wrap(element.parentNode, wrapper);
             }
@@ -661,9 +608,7 @@ Object.assign(_mauGalleryManager, {
               itemImg.setAttribute('data-related-gallery-id', `${galleryInstance.id}`);
             }
 
-            if (galleryInstance.options('showTags') && tag) {
-              galleryInstance.tagsSet().add(tag);
-            }
+            if (galleryInstance.options('showTags') && tag) galleryInstance.tagsSet().add(tag);
 
             const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
             const parent = galleryRootNode.querySelector(`.${mauPrefixClass}.row`);
@@ -672,9 +617,7 @@ Object.assign(_mauGalleryManager, {
           }
 
           galleryRootNode.querySelectorAll(`.${mauPrefixClass}.${galleryItemClass}`).forEach((item) => {
-            if (item.parentNode.tagName === 'PICTURE') {
-              item = item.parentNode;
-            }
+            if (item.parentNode.tagName === 'PICTURE') item = item.parentNode;
             doGenerateOneRowWrapper(galleryInstance, galleryRootNode, item);
           });
         }
@@ -695,19 +638,15 @@ Object.assign(_mauGalleryManager, {
       generateAllRowWrappers(galleryInstance);
 
       const lightBox = galleryInstance.options('lightBox');
-      if (lightBox) {
-        _mauGalleryManager.Modal.create(galleryInstance);
-      }
+      if (lightBox) _mauGalleryManager.Modal.create(galleryInstance);
 
       galleryInstance.showItemTags();
       _mauGalleryManager.AtomicGalleryManager.generateListeners(galleryInstance);
     }
 
     getGalleryInstance(galleryInstanceId) {
-      const matchingElements = this.archive.filter(({ id }) => id === galleryInstanceId);
-      if (matchingElements.length === 0) {
-        return null;
-      }
+      const matchingElements = this.archive.find(({ id }) => id === galleryInstanceId);
+      if (matchingElements.length === 0) return null;
       return matchingElements[0];
     }
   }
@@ -745,9 +684,8 @@ Object.assign(_mauGalleryManager, {
       }
 
       const invalidTargetPos = x < 0;
-      if (invalidTargetPos) {
-        return;
-      }
+      if (invalidTargetPos) return;
+
       const latencyToCounterpartScrollSmoothBehavior = 25;
       doMoveCamera(x, y, latencyToCounterpartScrollSmoothBehavior);
     }
@@ -759,11 +697,11 @@ Object.assign(_mauGalleryManager, {
           me.memos('activeElement', activeElement);
           me.memos('activeElementAbsoluteY', _mauGalleryManager.DomManipulations.getAbsoluteElementY(activeElement));
           me.memos('activeElementComputedBottom', _mauGalleryManager.DomManipulations.getElementBottomPx(activeElement));
-        } else {
-          me.memos('activeElement', null);
-          me.memos('activeElementAbsoluteY', null);
-          me.memos('activeElementComputedBottom', null);
+          return;
         }
+        me.memos('activeElement', null);
+        me.memos('activeElementAbsoluteY', null);
+        me.memos('activeElementComputedBottom', null);
       }
 
       this.memos('oldX', window.scrollX);
@@ -772,16 +710,12 @@ Object.assign(_mauGalleryManager, {
     }
 
     moveCameraToSavedPosition(rawMove = false) {
-      function processRawMove(me) {
-        me.moveCamera(me.memos('oldX'), me.memos('oldY'));
-      }
+      const processRawMove = (me) => me.moveCamera(me.memos('oldX'), me.memos('oldY'));
 
       function hotfix(me, activeElement) {
         me.moveCamera(me.memos('oldX'), me.memos('oldY'));
         me.memos('lockScreenHasGlitched', false);
-        if (activeElement) {
-          activeElement.focus({ preventScroll: true });
-        }
+        if (activeElement) activeElement.focus({ preventScroll: true });
       }
 
       function scrollToActiveElement(activeElement) {
@@ -802,9 +736,8 @@ Object.assign(_mauGalleryManager, {
           activeElement.scrollIntoView(true);
           activeElement.focus({ preventScroll: true });
           return true;
-        } else {
-          activeElement.focus({ preventScroll: true });
-        }
+        } else activeElement.focus({ preventScroll: true });
+
         return false;
       }
 
@@ -817,13 +750,12 @@ Object.assign(_mauGalleryManager, {
       const activeElement = this.memos('activeElement');
       const lockscreenGlitchCtx = this.memos('lockScreenHasGlitched') && window.scrollY + this.memos('oldYDelta') === this.memos('oldY');
       let scrolled = false;
-      if (activeGalleryPicture) {
-        scrolled = scrollToActiveElement(activeGalleryPicture);
-      } else if (activeElement) {
-        scrolled = scrollToActiveElement(activeElement);
-      }
+      if (activeGalleryPicture) scrolled = scrollToActiveElement(activeGalleryPicture);
+      else if (activeElement) scrolled = scrollToActiveElement(activeElement);
+
       if (lockscreenGlitchCtx && !scrolled) {
-        activeGalleryPicture ? hotfix(this, activeGalleryPicture) : hotfix(this, activeElement);
+        if (activeGalleryPicture) hotfix(this, activeGalleryPicture);
+        else hotfix(this, activeElement);
       }
     }
   }
@@ -844,9 +776,7 @@ Object.assign(_mauGalleryManager, {
         }
 
         function handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element) {
-          if (relatedGalleryInstance.options('tagsPosition') === 'bottom') {
-            element.scrollIntoView(false);
-          }
+          if (relatedGalleryInstance.options('tagsPosition') === 'bottom') element.scrollIntoView(false);
         }
 
         function forceReplayAnim(relatedGalleryInstance) {
@@ -881,11 +811,7 @@ Object.assign(_mauGalleryManager, {
           activeTag.classList.remove(filtersActiveTagClass, 'active');
           element.classList.add(mauPrefixClass, filtersActiveTagClass, 'active');
           richGalleryItems.forEach((richItem) => {
-            if (newTag === 'all' || richItem.item.dataset.galleryTag === newTag) {
-              richItem.column.style.display = null;
-            } else {
-              richItem.column.style.display = 'none';
-            }
+            richItem.column.style.display = newTag === 'all' || richItem.item.dataset.galleryTag === newTag ? null : 'none';
 
             handleCameraSideEffectsOnTagsPositionSettedToTop(relatedGalleryInstance);
             handleCameraSideEffectsOnTagsPositionSettedToBottom(relatedGalleryInstance, element);
@@ -899,9 +825,7 @@ Object.assign(_mauGalleryManager, {
         relatedGalleryInstance.memos('currentTag', newTag);
       }
 
-      if (element.classList.contains(relatedGalleryInstance.options('filtersActiveTagClass'))) {
-        return;
-      }
+      if (element.classList.contains(relatedGalleryInstance.options('filtersActiveTagClass'))) return;
       process(element);
     }
 
@@ -910,12 +834,9 @@ Object.assign(_mauGalleryManager, {
       const galleryRootNodeId = relatedGalleryInstance.options('galleryRootNodeId');
       const gallery = document.querySelector(`#${galleryRootNodeId}`);
       const galleryElementNavLinks = gallery.querySelectorAll(`#${galleryRootNodeId} .tags-bar .${mauPrefixClass}.nav-link`);
-      const relatedGalleryInstanceId = relatedGalleryInstance.id;
 
       galleryElementNavLinks.forEach((navlink) => navlink.addEventListener('click', (event) => _mauGalleryManager.AtomicGalleryManager.filterByTag(relatedGalleryInstance, event.target)));
-      if (!relatedGalleryInstance.options('lightBox')) {
-        return;
-      }
+      if (!relatedGalleryInstance.options('lightBox')) return;
 
       const modalTriggerClass = _mauGalleryManager.options('modalTriggerClass');
       const relatedGalleryInstanceModalTriggerElements = gallery.querySelectorAll(`#${galleryRootNodeId} .${mauPrefixClass}.${modalTriggerClass}`);
@@ -927,9 +848,8 @@ Object.assign(_mauGalleryManager, {
           let imgElement = event.target.querySelector('img') ?? event.target;
 
           if (relatedGalleryInstance.options('lightBox') && imgElement) {
-            if (imgElement.parentNode.tagName === 'PICTURE') {
-              imgElement = imgElement.parentNode;
-            }
+            if (imgElement.parentNode.tagName === 'PICTURE') imgElement = imgElement.parentNode;
+
             let targetAnchor = event.target;
             while (targetAnchor.tagName !== 'A' && !targetAnchor.classList.contains(_mauGalleryManager.options('modalTriggerClass'))) {
               targetAnchor = targetAnchor.parentNode;
@@ -947,16 +867,14 @@ Object.assign(_mauGalleryManager, {
 Object.assign(_mauGalleryManager, {
   appendGlobalCSS: () => {
     const style = (() => {
-      let style = document.createElement('style');
+      const style = document.createElement('style');
       style.appendChild(document.createTextNode(''));
       document.head.appendChild(style);
       return style;
     })();
 
     const optionsStyles = _mauGalleryManager.options('styles');
-    function animationStyleProperty(animationCategory, key) {
-      return optionsStyles.animation[animationCategory][key];
-    }
+    const animationStyleProperty = (animationCategory, key) => optionsStyles.animation[animationCategory][key];
 
     const arrowTransitionDelay = animationStyleProperty('modal', 'arrowTransitionDelay');
 
@@ -1067,9 +985,7 @@ Object.assign(_mauGalleryManager, {
         Object.seal(mauProps);
         Object.seal(mauProps.memos);
         Object.assign(mauProps.options, opt);
-        if (!mauProps.options.mutableOptions) {
-          Object.freeze(mauProps.options);
-        }
+        if (!mauProps.options.mutableOptions) Object.freeze(mauProps.options);
       }
       assignAndLockObjs(this.props);
       _mauGalleryManager.GalleriesArchive.appendGalleryInstance(this);
@@ -1088,9 +1004,7 @@ Object.assign(_mauGalleryManager, {
     }
 
     getRichGalleryItems(lazy = true) {
-      if (lazy && this.memos('richGalleryItems')) {
-        return this.memos('richGalleryItems');
-      }
+      if (lazy && this.memos('richGalleryItems')) return this.memos('richGalleryItems');
 
       const galleryRootNodeId = this.options('galleryRootNodeId');
       const mauPrefixClass = _mauGalleryManager.options('mauPrefixClass');
@@ -1101,9 +1015,7 @@ Object.assign(_mauGalleryManager, {
       columns.forEach((column) => {
         const item = column.querySelector(`.${mauPrefixClass}.${galleryItemClass}`);
 
-        if (item.parentNode.tagName === 'PICTURE') {
-          picture = item.parentNode;
-        }
+        if (item.parentNode.tagName === 'PICTURE') picture = item.parentNode;
 
         const entry = { item, column, picture };
         dataEntries.push(entry);
@@ -1113,9 +1025,7 @@ Object.assign(_mauGalleryManager, {
     }
 
     showItemTags() {
-      if (!this.options('showTags')) {
-        return;
-      }
+      if (!this.options('showTags')) return;
 
       const galleryRootNodeId = this.options('galleryRootNodeId');
       const galleryRootNode = document.querySelector(`#${galleryRootNodeId}`);
@@ -1129,13 +1039,9 @@ Object.assign(_mauGalleryManager, {
       );
       const tagsRow = `<ul class="my-4 tags-bar nav nav-pills">${tagItems}</ul>`;
 
-      if (tagsPosition === 'bottom') {
-        galleryRootNode.innerHTML = galleryRootNode.innerHTML + tagsRow;
-      } else if (tagsPosition === 'top') {
-        galleryRootNode.innerHTML = tagsRow + galleryRootNode.innerHTML;
-      } else {
-        throw new Error(`Unknown tags position: ${tagsPosition}`);
-      }
+      if (tagsPosition === 'bottom') galleryRootNode.innerHTML = galleryRootNode.innerHTML + tagsRow;
+      else if (tagsPosition === 'top') galleryRootNode.innerHTML = tagsRow + galleryRootNode.innerHTML;
+      else throw new Error(`Unknown tags position: ${tagsPosition}`);
     }
   }
 });
