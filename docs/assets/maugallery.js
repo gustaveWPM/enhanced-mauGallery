@@ -90,7 +90,7 @@ Object.assign(_mauGalleryManager, {
       if (url === null || this.imgUrlsCache.has(url)) {
         return;
       }
-      const isValid = (token) => token.indexOf('/') !== -1 || token.indexOf('.') !== -1;
+      const isValid = (token) => token.includes('/') || token.includes('.');
       if (!isValid(url)) {
         return;
       }
@@ -270,7 +270,7 @@ Object.assign(_mauGalleryManager, {
       function purgeModalImg(element, htmlAttributesWhitelist) {
         const toRemove = [];
         for (let i = 0, attrs = element.attributes; attrs[i]; i++) {
-          let attrKey = attrs[i].nodeName;
+          const attrKey = attrs[i].nodeName;
 
           if (htmlAttributesWhitelist.indexOf(attrKey) === -1) {
             toRemove.push(attrKey);
