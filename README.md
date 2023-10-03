@@ -21,7 +21,7 @@ Bootstrap 5 Gallery, vanilla JS.
 ## Two imports scenarios
 
 ```html
-<script src="./assets/maugalleryLauncher.js" async defer></script>
+<script src="./assets/maugalleryLauncher.js" async></script>
 ```
 
 ```html
