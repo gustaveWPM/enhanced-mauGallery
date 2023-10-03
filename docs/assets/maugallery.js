@@ -7,7 +7,7 @@ const _mauGalleryManager = {
 
 // * ... Default global config
 Object.assign(_mauGalleryManager.mauGalleryGlobalConfig, {
-  lightboxId: `${_mauGalleryManager.mauPrefixClass}-lightbox`,
+  lightboxId: `${_mauGalleryManager.mauGalleryGlobalConfig.mauPrefixClass}-lightbox`,
   anyImageServedByHTTP1Server: true,
   prevImgButtonLabel: 'Previous image',
   nextImgButtonLabel: 'Next image',
