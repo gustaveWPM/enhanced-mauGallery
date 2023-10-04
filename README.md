@@ -33,6 +33,16 @@ Bootstrap 5 Gallery, vanilla JS.
 
 [https://gustavewpm.github.io/enhanced-mauGallery/](https://gustavewpm.github.io/enhanced-mauGallery/)
 
+#### CLS issues
+
+[_Pagespeed Insights_](https://pagespeed.web.dev/) may sometimes indicate a high CLS on the demo page of this project.  
+When the JavaScript code executes quickly enough, this does not occur. However, due to the unpredictable nature of web environments, the code might not execute fast enough, causing CLS to spike.
+
+This happens because the placeholders used in this project do not have heights matching those of gallery elements once they are loaded. In this case, [_Pagespeed Insights_](https://pagespeed.web.dev/)
+detects the replacement of these placeholders by gallery elements, leading to a significant CLS increase.
+
+It is up to you to consider this point and adjust your placeholders so that this CLS issue does not occur, regardless of how quickly the JavaScript code is executed.
+
 ---
 
 ## Original README.md
