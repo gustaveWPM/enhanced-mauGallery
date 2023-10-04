@@ -1,7 +1,8 @@
 // * ... Prefix Class
 const _mauGalleryManager = {
   mauGalleryGlobalConfig: {
-    mauPrefixClass: typeof _asyncMauGalleryLauncher !== 'undefined' ? _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.mauPrefixClass : 'mau'
+    mauPrefixClass: typeof _asyncMauGalleryLauncher !== 'undefined' ? _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.mauPrefixClass : 'mau',
+    galleryPlaceholderClass: typeof _asyncMauGalleryLauncher !== 'undefined' ? _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.galleryPlaceholderClass : 'gallery-placeholder'
   }
 };
 
@@ -15,7 +16,6 @@ Object.assign(_mauGalleryManager.mauGalleryGlobalConfig, {
   modalTriggerClass: 'modal-trigger',
   galleryItemClass: 'gallery-item',
   modalWrapperClass: 'modal-component',
-  galleryPlaceHolderClass: 'gallery-placeholder',
   styles: {
     animation: {
       modal: {
@@ -1077,8 +1077,8 @@ if (typeof _asyncMauGalleryLauncher === 'undefined') {
 
   _mauGalleryManager.mauGalleriesConfig.forEach((conf) => {
     new _mauGalleryManager.MauGallery(conf);
-    const galleryPlaceHolderClass = _mauGalleryManager.options('galleryPlaceHolderClass');
-    const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceHolderClass}`);
+    const galleryPlaceholderClass = _mauGalleryManager.options('galleryPlaceholderClass');
+    const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceholderClass}`);
     if (placeholder) placeholder.remove();
   });
 }

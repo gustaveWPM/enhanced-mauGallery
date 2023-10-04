@@ -1,10 +1,11 @@
 let _asyncMauGalleryLauncher = {
   LauncherCls: class LauncherCls {
     constructor() {
-      this.failedToLoadMauGalleryMsg = 'Failed to load MauGallery! Please, retry to load this page.';
+      this.failedToLoadMauGalleryMsg = 'Failed to load MauGallery! Please, try to refresh this page.';
       this.boostrapIsAsyncLoadedSomewhereElseInMyCodebasePleaseDoNotAsyncLoadItHereImBeggingYou = false;
       this.globalMauGalleryConfig = {
-        mauPrefixClass: 'mau'
+        mauPrefixClass: 'mau',
+        galleryPlaceholderClass: 'gallery-placeholder'
       };
 
       this.readyToMountGalleriesComponents = false;
@@ -43,8 +44,8 @@ let _asyncMauGalleryLauncher = {
               clearInterval(coroutine);
               launcherPtr.Launcher.mauGalleriesConfig.forEach((conf) => {
                 new _mauGalleryManager.MauGallery(conf);
-                const galleryPlaceHolderClass = _mauGalleryManager.options('galleryPlaceHolderClass');
-                const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceHolderClass}`);
+                const galleryPlaceholderClass = _mauGalleryManager.options('galleryPlaceholderClass');
+                const placeholder = document.querySelector(`#${conf.galleryRootNodeId} .${galleryPlaceholderClass}`);
                 if (placeholder) placeholder.remove();
               });
             }
@@ -482,10 +483,11 @@ let _asyncMauGalleryLauncher = {
             errorCallbacks: [
               async function failedToInjectMauGallery() {
                 const mauPrefixClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.mauPrefixClass;
-                const galleryPlaceHolderClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.galleryPlaceHolderClass;
-                const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceHolderClass}`);
+                const galleryPlaceholderClass = _asyncMauGalleryLauncher.Launcher.globalMauGalleryConfig.galleryPlaceholderClass;
+                const placeholders = document.querySelectorAll(`.${mauPrefixClass}.${galleryPlaceholderClass}`);
                 placeholders.forEach(
-                  (element) => (element.outerHTML = `<div class="mau gallery-placeholder alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher.failedToLoadMauGalleryMsg}</div>`)
+                  (element) =>
+                    (element.outerHTML = `<div class="${mauPrefixClass} ${galleryPlaceholderClass} alert alert-danger" role="alert">${_asyncMauGalleryLauncher.Launcher.failedToLoadMauGalleryMsg}</div>`)
                 );
               }
             ]
